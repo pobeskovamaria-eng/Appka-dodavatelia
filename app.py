@@ -10,6 +10,7 @@ import streamlit as st
 
 from src.i18n import t
 from src.inquiry import build_inquiry, mailto_link
+from src.pricing import format_range, indicative_range
 from src.search import Filters, all_certifications, apply_filters, load_suppliers
 from src.web_search import build_query, search_web
 
@@ -189,19 +190,38 @@ def render_supplier_card(s: dict, inquiry_subject: str, inquiry_body: str) -> No
         tier = price.get("tier")
         tier_label = price.get("notes", "")
         quoted = price.get("price_eur_per_meter")
+
+        price_lines: list[str] = []
         if quoted is not None:
-            price_line = (
+            price_lines.append(
                 f"💶 **{tt('price_tier')}:** {tier or tt('tier_na')}  ·  "
                 f"**{tt('price_quoted')}:** {quoted} €/m"
             )
         else:
-            price_line = (
+            price_lines.append(
                 f"💶 **{tt('price_tier')}:** {tier or tt('tier_na')}  "
                 f"*({tt('price_estimate_label')})*"
             )
+
+        # Per-material indicative ranges
+        if tier:
+            for m in s.get("materials", []):
+                rng = indicative_range(m, tier)
+                if rng:
+                    low, high = rng
+                    mat_label = tt(f"material_{m}") if f"material_{m}" in (
+                        "material_silk", "material_cotton", "material_tencel",
+                        "material_bamboo", "material_linen", "material_wool",
+                    ) else m
+                    price_lines.append(
+                        f"• **{tt('indicative_price')} {tt('per_material')} {mat_label}:** "
+                        f"{format_range(low, high)}"
+                    )
+
         if tier_label:
-            price_line += f"  \n*{tier_label}*"
-        st.warning(price_line)
+            price_lines.append(f"*{tier_label}*")
+
+        st.warning("  \n".join(price_lines))
 
         if s.get("ethical_principles"):
             st.write(f"**{tt('principles')}:** {s['ethical_principles']}")
