@@ -9,6 +9,7 @@ from __future__ import annotations
 import streamlit as st
 
 from src.i18n import t
+from src.inquiry import build_inquiry, mailto_link
 from src.search import Filters, all_certifications, apply_filters, load_suppliers
 from src.web_search import build_query, search_web
 
@@ -118,7 +119,7 @@ TYPE_LABEL_KEYS = {
 }
 
 
-def render_supplier_card(s: dict) -> None:
+def render_supplier_card(s: dict, inquiry_subject: str, inquiry_body: str) -> None:
     badge = "✅ " + tt("verified_label") if s.get("verified") else "🔎 " + tt("to_verify_label")
     type_key = TYPE_LABEL_KEYS.get(s.get("type", ""), "supplier_type")
     type_label = tt(type_key) if type_key != "supplier_type" else s.get("type", "")
@@ -163,8 +164,9 @@ def render_supplier_card(s: dict) -> None:
         if certs:
             st.write("**" + tt("certifications") + ":** " + ", ".join(certs))
 
-        if s.get("moq_notes"):
-            st.write(f"**{tt('moq')}:** {s['moq_notes']}")
+        # --- MOQ box (prominent) ---
+        moq_text = s.get("moq_notes") or tt("moq_unknown")
+        st.info(f"📦 **{tt('moq_info')}:** {moq_text}")
 
         if s.get("ethical_principles"):
             st.write(f"**{tt('principles')}:** {s['ethical_principles']}")
@@ -172,6 +174,44 @@ def render_supplier_card(s: dict) -> None:
         if s.get("verify_notes"):
             st.caption(f"ℹ️ {tt('verify_notes')}: {s['verify_notes']}")
 
+        # --- Inquiry section ---
+        with st.expander(f"📨 {tt('inquiry')}", expanded=False):
+            email = s.get("contact_email")
+            contact_page = s.get("contact_page") or s.get("website")
+
+            btn_cols = st.columns(2)
+            with btn_cols[0]:
+                if email:
+                    st.link_button(
+                        tt("send_email"),
+                        mailto_link(email, inquiry_subject, inquiry_body),
+                        type="primary",
+                    )
+                    st.caption(f"✉️ {email}")
+                else:
+                    st.caption(f"⚠️ {tt('no_public_email')}")
+            with btn_cols[1]:
+                if contact_page:
+                    st.link_button(tt("open_contact_page"), contact_page)
+
+            st.markdown(f"**{tt('inquiry_template')}**")
+            st.caption(tt("copy_hint"))
+            st.text_area(
+                label=tt("inquiry_template"),
+                value=f"Subject: {inquiry_subject}\n\n{inquiry_body}",
+                height=320,
+                key=f"inquiry_{s['id']}",
+                label_visibility="collapsed",
+            )
+
+
+inquiry_subject, inquiry_body = build_inquiry(
+    lang=lang,
+    materials=materials,
+    mommi=mommi_selected,
+    only_mulberry=only_mulberry,
+    dyeing_required=dyeing_required,
+)
 
 with tab_curated:
     st.write(f"**{tt('count_results')}** {len(filtered)}")
@@ -179,7 +219,7 @@ with tab_curated:
         st.warning(tt("no_results"))
     else:
         for s in filtered:
-            render_supplier_card(s)
+            render_supplier_card(s, inquiry_subject, inquiry_body)
 
 
 with tab_web:
