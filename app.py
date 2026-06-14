@@ -90,6 +90,21 @@ with st.sidebar:
     available_certs = all_certifications(suppliers)
     certs = st.multiselect(tt("certifications"), options=available_certs, default=[])
 
+    tier_options = ["€", "€€", "€€€", "€€€€"]
+    tier_label_map = {
+        "€": tt("tier_1"),
+        "€€": tt("tier_2"),
+        "€€€": tt("tier_3"),
+        "€€€€": tt("tier_4"),
+    }
+    price_tiers = st.multiselect(
+        tt("price_tier"),
+        options=tier_options,
+        default=[],
+        format_func=lambda x: tier_label_map[x],
+    )
+    st.caption("ℹ️ " + tt("price_disclaimer"))
+
     verified_only = st.checkbox(tt("verified_only"), value=False)
 
 
@@ -103,6 +118,7 @@ filters = Filters(
     regions=set(regions),
     certifications=set(certs),
     verified_only=verified_only,
+    price_tiers=set(price_tiers),
 )
 
 filtered = apply_filters(suppliers, filters)
@@ -167,6 +183,25 @@ def render_supplier_card(s: dict, inquiry_subject: str, inquiry_body: str) -> No
         # --- MOQ box (prominent) ---
         moq_text = s.get("moq_notes") or tt("moq_unknown")
         st.info(f"📦 **{tt('moq_info')}:** {moq_text}")
+
+        # --- Price tier box (prominent) ---
+        price = s.get("price") or {}
+        tier = price.get("tier")
+        tier_label = price.get("notes", "")
+        quoted = price.get("price_eur_per_meter")
+        if quoted is not None:
+            price_line = (
+                f"💶 **{tt('price_tier')}:** {tier or tt('tier_na')}  ·  "
+                f"**{tt('price_quoted')}:** {quoted} €/m"
+            )
+        else:
+            price_line = (
+                f"💶 **{tt('price_tier')}:** {tier or tt('tier_na')}  "
+                f"*({tt('price_estimate_label')})*"
+            )
+        if tier_label:
+            price_line += f"  \n*{tier_label}*"
+        st.warning(price_line)
 
         if s.get("ethical_principles"):
             st.write(f"**{tt('principles')}:** {s['ethical_principles']}")

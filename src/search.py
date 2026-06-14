@@ -22,6 +22,7 @@ class Filters:
     regions: set[str] = field(default_factory=set)
     certifications: set[str] = field(default_factory=set)
     verified_only: bool = False
+    price_tiers: set[str] = field(default_factory=set)
 
 
 def load_suppliers() -> list[dict]:
@@ -78,6 +79,11 @@ def apply_filters(suppliers: list[dict], f: Filters) -> list[dict]:
             s_certs = {c.upper() for c in s.get("certifications", [])}
             wanted = {c.upper() for c in f.certifications}
             if not wanted.issubset(s_certs):
+                continue
+
+        if f.price_tiers:
+            s_tier = (s.get("price") or {}).get("tier")
+            if s_tier not in f.price_tiers:
                 continue
 
         out.append(s)

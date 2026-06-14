@@ -1,6 +1,6 @@
 {
-  "schema_version": 2,
-  "note": "Curated list of candidate mills / weavers / fabric manufacturers (NOT resellers of finished goods). Each entry must be verified directly with the supplier before placing orders — capabilities, MOQs, contact emails and certifications change over time. Where a public email could not be confirmed, contact_email is null and the inquiry should be sent via contact_page.",
+  "schema_version": 3,
+  "note": "Curated list of candidate mills / weavers / fabric manufacturers (NOT resellers of finished goods). Each entry must be verified directly with the supplier before placing orders — capabilities, MOQs, contact emails, prices and certifications change over time. Where a public email could not be confirmed, contact_email is null and the inquiry should be sent via contact_page. Price tiers (€/€€/€€€/€€€€) are market positioning estimates — B2B fabric mills do not publish per-meter prices publicly. Real prices come only via a written quote. Fill `price_eur_per_meter` once you receive quotes.",
   "suppliers": [
     {
       "id": "maeko-tessuti",
@@ -11,17 +11,51 @@
       "country": "Italy",
       "region": "Europe",
       "type": "manufacturer",
-      "materials": ["silk", "cotton", "tencel", "linen"],
-      "silk": { "mulberry": true, "mommi": [16, 19, 22, 25, 30] },
-      "cotton": { "types": ["poplin", "voile", "sateen"], "organic_available": true },
-      "tencel": { "available": true },
-      "bamboo": { "available": false },
+      "materials": [
+        "silk",
+        "cotton",
+        "tencel",
+        "linen"
+      ],
+      "silk": {
+        "mulberry": true,
+        "mommi": [
+          16,
+          19,
+          22,
+          25,
+          30
+        ]
+      },
+      "cotton": {
+        "types": [
+          "poplin",
+          "voile",
+          "sateen"
+        ],
+        "organic_available": true
+      },
+      "tencel": {
+        "available": true
+      },
+      "bamboo": {
+        "available": false
+      },
       "dyeing": true,
-      "certifications": ["OEKO-TEX"],
+      "certifications": [
+        "OEKO-TEX"
+      ],
       "moq_notes": "Low MOQ — friendly to small/emerging brands. Confirm exact MOQ per quality.",
       "verified": true,
       "verify_notes": "Benchmark supplier referenced by user.",
-      "ethical_principles": "Traceable supply chain, natural fibres, transparent sourcing."
+      "ethical_principles": "Traceable supply chain, natural fibres, transparent sourcing.",
+      "price": {
+        "tier": "€€",
+        "source": "market_estimate",
+        "currency": "EUR",
+        "price_eur_per_meter": null,
+        "notes": "Small-batch friendly premium silk — accessible to emerging brands."
+      }
     },
     {
       "id": "taroni",
@@ -32,17 +66,38 @@
       "country": "Italy",
       "region": "Europe",
       "type": "weaver",
-      "materials": ["silk"],
-      "silk": { "mulberry": true, "mommi": [16, 19, 22, 25, 30, 35] },
+      "materials": [
+        "silk"
+      ],
+      "silk": {
+        "mulberry": true,
+        "mommi": [
+          16,
+          19,
+          22,
+          25,
+          30,
+          35
+        ]
+      },
       "cotton": null,
       "tencel": null,
       "bamboo": null,
       "dyeing": true,
-      "certifications": ["OEKO-TEX"],
+      "certifications": [
+        "OEKO-TEX"
+      ],
       "moq_notes": "Couture-level MOQ (typically 30–50 m per quality / colour). Confirm directly.",
       "verified": false,
       "verify_notes": "Historic Como silk weaver, supplies haute couture. Confirm current mommi range and dyeing services.",
-      "ethical_principles": "Italian textile tradition; verify sustainability claims."
+      "ethical_principles": "Italian textile tradition; verify sustainability claims.",
+      "price": {
+        "tier": "€€€€",
+        "source": "market_estimate",
+        "currency": "EUR",
+        "price_eur_per_meter": null,
+        "notes": "Haute-couture silk weaver — expect couture-level pricing."
+      }
     },
     {
       "id": "mantero",
@@ -53,17 +108,38 @@
       "country": "Italy",
       "region": "Europe",
       "type": "manufacturer",
-      "materials": ["silk"],
-      "silk": { "mulberry": true, "mommi": [16, 19, 22, 25, 30] },
+      "materials": [
+        "silk"
+      ],
+      "silk": {
+        "mulberry": true,
+        "mommi": [
+          16,
+          19,
+          22,
+          25,
+          30
+        ]
+      },
       "cotton": null,
       "tencel": null,
       "bamboo": null,
       "dyeing": true,
-      "certifications": ["OEKO-TEX", "ZDHC"],
+      "certifications": [
+        "OEKO-TEX",
+        "ZDHC"
+      ],
       "moq_notes": "B2B — typical MOQ 50–100 m per quality. Confirm directly.",
       "verified": false,
       "verify_notes": "Como silk house with vertically integrated dyeing and printing.",
-      "ethical_principles": "ZDHC participant; verify current sustainability programme."
+      "ethical_principles": "ZDHC participant; verify current sustainability programme.",
+      "price": {
+        "tier": "€€€€",
+        "source": "market_estimate",
+        "currency": "EUR",
+        "price_eur_per_meter": null,
+        "notes": "Luxury silk house, supplies fashion maisons."
+      }
     },
     {
       "id": "ratti",
@@ -74,17 +150,46 @@
       "country": "Italy",
       "region": "Europe",
       "type": "manufacturer",
-      "materials": ["silk", "cotton"],
-      "silk": { "mulberry": true, "mommi": [12, 16, 19, 22, 25] },
-      "cotton": { "types": ["poplin", "sateen"], "organic_available": false },
+      "materials": [
+        "silk",
+        "cotton"
+      ],
+      "silk": {
+        "mulberry": true,
+        "mommi": [
+          12,
+          16,
+          19,
+          22,
+          25
+        ]
+      },
+      "cotton": {
+        "types": [
+          "poplin",
+          "sateen"
+        ],
+        "organic_available": false
+      },
       "tencel": null,
       "bamboo": null,
       "dyeing": true,
-      "certifications": ["OEKO-TEX", "ZDHC", "GRS"],
+      "certifications": [
+        "OEKO-TEX",
+        "ZDHC",
+        "GRS"
+      ],
       "moq_notes": "B2B — high MOQ (100+ m). Confirm directly.",
       "verified": false,
       "verify_notes": "Vertically integrated, sustainability programme. Confirm cotton fibre origin.",
-      "ethical_principles": "Detox commitment, traceability programme."
+      "ethical_principles": "Detox commitment, traceability programme.",
+      "price": {
+        "tier": "€€€",
+        "source": "market_estimate",
+        "currency": "EUR",
+        "price_eur_per_meter": null,
+        "notes": "Premium B2B — typical luxury brand supplier."
+      }
     },
     {
       "id": "canepa",
@@ -95,17 +200,44 @@
       "country": "Italy",
       "region": "Europe",
       "type": "manufacturer",
-      "materials": ["silk", "cotton"],
-      "silk": { "mulberry": true, "mommi": [16, 19, 22, 25] },
-      "cotton": { "types": ["poplin", "sateen"], "organic_available": true },
+      "materials": [
+        "silk",
+        "cotton"
+      ],
+      "silk": {
+        "mulberry": true,
+        "mommi": [
+          16,
+          19,
+          22,
+          25
+        ]
+      },
+      "cotton": {
+        "types": [
+          "poplin",
+          "sateen"
+        ],
+        "organic_available": true
+      },
       "tencel": null,
       "bamboo": null,
       "dyeing": true,
-      "certifications": ["OEKO-TEX", "GOTS"],
+      "certifications": [
+        "OEKO-TEX",
+        "GOTS"
+      ],
       "moq_notes": "B2B — confirm MOQ directly.",
       "verified": false,
       "verify_notes": "Como silk weaver, known for sustainable finishing (Kitotex).",
-      "ethical_principles": "Chemistry-reduced finishing; verify."
+      "ethical_principles": "Chemistry-reduced finishing; verify.",
+      "price": {
+        "tier": "€€€",
+        "source": "market_estimate",
+        "currency": "EUR",
+        "price_eur_per_meter": null,
+        "notes": "Premium B2B silk + sustainable finishing."
+      }
     },
     {
       "id": "belinac",
@@ -116,17 +248,38 @@
       "country": "France",
       "region": "Europe",
       "type": "weaver",
-      "materials": ["silk"],
-      "silk": { "mulberry": true, "mommi": [12, 16, 19, 22, 25, 30] },
+      "materials": [
+        "silk"
+      ],
+      "silk": {
+        "mulberry": true,
+        "mommi": [
+          12,
+          16,
+          19,
+          22,
+          25,
+          30
+        ]
+      },
       "cotton": null,
       "tencel": null,
       "bamboo": null,
       "dyeing": true,
-      "certifications": ["OEKO-TEX"],
+      "certifications": [
+        "OEKO-TEX"
+      ],
       "moq_notes": "Confirm directly — typically B2B MOQ.",
       "verified": false,
       "verify_notes": "Lyon-based silk weaver, French tradition.",
-      "ethical_principles": "European production; verify sourcing of raw silk."
+      "ethical_principles": "European production; verify sourcing of raw silk.",
+      "price": {
+        "tier": "€€€",
+        "source": "market_estimate",
+        "currency": "EUR",
+        "price_eur_per_meter": null,
+        "notes": "French silk weaver — premium pricing."
+      }
     },
     {
       "id": "albini",
@@ -137,17 +290,38 @@
       "country": "Italy",
       "region": "Europe",
       "type": "manufacturer",
-      "materials": ["cotton"],
+      "materials": [
+        "cotton"
+      ],
       "silk": null,
-      "cotton": { "types": ["poplin", "twill", "oxford", "voile"], "organic_available": true },
+      "cotton": {
+        "types": [
+          "poplin",
+          "twill",
+          "oxford",
+          "voile"
+        ],
+        "organic_available": true
+      },
       "tencel": null,
       "bamboo": null,
       "dyeing": true,
-      "certifications": ["GOTS", "OEKO-TEX", "BCI"],
+      "certifications": [
+        "GOTS",
+        "OEKO-TEX",
+        "BCI"
+      ],
       "moq_notes": "Standard B2B: ~100+ m per article. Smaller MOQs possible via Albini Donna programme.",
       "verified": false,
       "verify_notes": "Premium cotton shirting mill, owns Thomas Mason and David & John Anderson. Confirm dyeing capacity for custom colours.",
-      "ethical_principles": "Traceability programme, Egyptian cotton partnerships."
+      "ethical_principles": "Traceability programme, Egyptian cotton partnerships.",
+      "price": {
+        "tier": "€€€",
+        "source": "market_estimate",
+        "currency": "EUR",
+        "price_eur_per_meter": null,
+        "notes": "Premium cotton shirting — high-end positioning."
+      }
     },
     {
       "id": "canclini",
@@ -158,17 +332,39 @@
       "country": "Italy",
       "region": "Europe",
       "type": "manufacturer",
-      "materials": ["cotton"],
+      "materials": [
+        "cotton"
+      ],
       "silk": null,
-      "cotton": { "types": ["poplin", "twill", "oxford", "flannel"], "organic_available": true },
-      "tencel": { "available": true },
+      "cotton": {
+        "types": [
+          "poplin",
+          "twill",
+          "oxford",
+          "flannel"
+        ],
+        "organic_available": true
+      },
+      "tencel": {
+        "available": true
+      },
       "bamboo": null,
       "dyeing": true,
-      "certifications": ["GOTS", "OEKO-TEX"],
+      "certifications": [
+        "GOTS",
+        "OEKO-TEX"
+      ],
       "moq_notes": "B2B — confirm MOQ directly.",
       "verified": false,
       "verify_notes": "Italian shirting mill, also offers Tencel blends.",
-      "ethical_principles": "European production; verify sustainability claims."
+      "ethical_principles": "European production; verify sustainability claims.",
+      "price": {
+        "tier": "€€",
+        "source": "market_estimate",
+        "currency": "EUR",
+        "price_eur_per_meter": null,
+        "notes": "Premium B2B cotton shirting, slightly more accessible than Albini."
+      }
     },
     {
       "id": "tintex",
@@ -179,17 +375,40 @@
       "country": "Portugal",
       "region": "Europe",
       "type": "manufacturer",
-      "materials": ["tencel", "cotton"],
+      "materials": [
+        "tencel",
+        "cotton"
+      ],
       "silk": null,
-      "cotton": { "types": ["jersey", "interlock"], "organic_available": true },
-      "tencel": { "available": true },
+      "cotton": {
+        "types": [
+          "jersey",
+          "interlock"
+        ],
+        "organic_available": true
+      },
+      "tencel": {
+        "available": true
+      },
       "bamboo": null,
       "dyeing": true,
-      "certifications": ["GOTS", "OEKO-TEX", "Cradle to Cradle", "Bluesign"],
+      "certifications": [
+        "GOTS",
+        "OEKO-TEX",
+        "Cradle to Cradle",
+        "Bluesign"
+      ],
       "moq_notes": "Accommodating to emerging brands — typically 50–150 kg per article. Confirm directly.",
       "verified": false,
       "verify_notes": "Naturally Advanced programme. Tencel jersey/woven specialist with in-house dyeing.",
-      "ethical_principles": "Cradle to Cradle Gold, closed-loop production, strong sustainability credentials."
+      "ethical_principles": "Cradle to Cradle Gold, closed-loop production, strong sustainability credentials.",
+      "price": {
+        "tier": "€€",
+        "source": "market_estimate",
+        "currency": "EUR",
+        "price_eur_per_meter": null,
+        "notes": "Sustainable jersey/woven specialist — accommodating to emerging brands."
+      }
     },
     {
       "id": "riopele",
@@ -200,17 +419,38 @@
       "country": "Portugal",
       "region": "Europe",
       "type": "manufacturer",
-      "materials": ["cotton", "tencel"],
+      "materials": [
+        "cotton",
+        "tencel"
+      ],
       "silk": null,
-      "cotton": { "types": ["woven"], "organic_available": true },
-      "tencel": { "available": true },
+      "cotton": {
+        "types": [
+          "woven"
+        ],
+        "organic_available": true
+      },
+      "tencel": {
+        "available": true
+      },
       "bamboo": null,
       "dyeing": true,
-      "certifications": ["GOTS", "OEKO-TEX", "GRS"],
+      "certifications": [
+        "GOTS",
+        "OEKO-TEX",
+        "GRS"
+      ],
       "moq_notes": "B2B — typically 200+ m per article. Confirm directly.",
       "verified": false,
       "verify_notes": "Vertically integrated Portuguese mill, Tencel blends and dyeing.",
-      "ethical_principles": "Water reduction programme; verify current targets."
+      "ethical_principles": "Water reduction programme; verify current targets.",
+      "price": {
+        "tier": "€€",
+        "source": "market_estimate",
+        "currency": "EUR",
+        "price_eur_per_meter": null,
+        "notes": "Vertically integrated Portuguese mill, competitive B2B pricing."
+      }
     },
     {
       "id": "lemar",
@@ -221,17 +461,38 @@
       "country": "Italy",
       "region": "Europe",
       "type": "manufacturer",
-      "materials": ["tencel", "cotton", "linen"],
+      "materials": [
+        "tencel",
+        "cotton",
+        "linen"
+      ],
       "silk": null,
-      "cotton": { "types": ["jersey"], "organic_available": true },
-      "tencel": { "available": true },
+      "cotton": {
+        "types": [
+          "jersey"
+        ],
+        "organic_available": true
+      },
+      "tencel": {
+        "available": true
+      },
       "bamboo": null,
       "dyeing": true,
-      "certifications": ["GOTS", "OEKO-TEX"],
+      "certifications": [
+        "GOTS",
+        "OEKO-TEX"
+      ],
       "moq_notes": "B2B — confirm MOQ directly.",
       "verified": false,
       "verify_notes": "Italian jersey mill working with natural fibres including Tencel.",
-      "ethical_principles": "European production; verify certifications."
+      "ethical_principles": "European production; verify certifications.",
+      "price": {
+        "tier": "€€",
+        "source": "market_estimate",
+        "currency": "EUR",
+        "price_eur_per_meter": null,
+        "notes": "Italian jersey mill, mid-market B2B."
+      }
     },
     {
       "id": "lenzing",
@@ -242,17 +503,32 @@
       "country": "Austria",
       "region": "Europe",
       "type": "fibre_producer",
-      "materials": ["tencel"],
+      "materials": [
+        "tencel"
+      ],
       "silk": null,
       "cotton": null,
-      "tencel": { "available": true },
+      "tencel": {
+        "available": true
+      },
       "bamboo": null,
       "dyeing": false,
-      "certifications": ["FSC", "PEFC", "EU Ecolabel"],
+      "certifications": [
+        "FSC",
+        "PEFC",
+        "EU Ecolabel"
+      ],
       "moq_notes": "Fibre producer — not a fabric MOQ. Use TENCEL E-Branding partner finder to locate authorised mills.",
       "verified": true,
       "verify_notes": "Source of TENCEL/Lyocell fibre; not a fabric supplier itself. Use Lenzing E-Branding for licensed mills.",
-      "ethical_principles": "Closed-loop solvent recovery, certified wood pulp sourcing."
+      "ethical_principles": "Closed-loop solvent recovery, certified wood pulp sourcing.",
+      "price": {
+        "tier": null,
+        "source": "market_estimate",
+        "currency": "EUR",
+        "price_eur_per_meter": null,
+        "notes": "Fibre producer — no fabric price tier applicable."
+      }
     },
     {
       "id": "litrax",
@@ -263,17 +539,31 @@
       "country": "Switzerland",
       "region": "Europe",
       "type": "fibre_producer",
-      "materials": ["bamboo"],
+      "materials": [
+        "bamboo"
+      ],
       "silk": null,
       "cotton": null,
       "tencel": null,
-      "bamboo": { "available": true, "type": "natural_bamboo_fibre" },
+      "bamboo": {
+        "available": true,
+        "type": "natural_bamboo_fibre"
+      },
       "dyeing": false,
-      "certifications": ["OEKO-TEX"],
+      "certifications": [
+        "OEKO-TEX"
+      ],
       "moq_notes": "Fibre supplier — connects you with mills that spin/weave Litrax bamboo. Confirm MOQ via Litrax.",
       "verified": false,
       "verify_notes": "Offers mechanical (not viscose) bamboo fibre. Verify current availability and downstream mills.",
-      "ethical_principles": "Mechanical processing (closer to true 'natural' bamboo than bamboo viscose)."
+      "ethical_principles": "Mechanical processing (closer to true 'natural' bamboo than bamboo viscose).",
+      "price": {
+        "tier": "€€€",
+        "source": "market_estimate",
+        "currency": "EUR",
+        "price_eur_per_meter": null,
+        "notes": "Specialty natural bamboo fibre — premium positioning."
+      }
     },
     {
       "id": "lanificio-paoletti",
@@ -284,9 +574,24 @@
       "country": "Italy",
       "region": "Europe",
       "type": "weaver",
-      "materials": ["wool", "cotton", "silk"],
-      "silk": { "mulberry": true, "mommi": [19, 22] },
-      "cotton": { "types": ["woven"], "organic_available": false },
+      "materials": [
+        "wool",
+        "cotton",
+        "silk"
+      ],
+      "silk": {
+        "mulberry": true,
+        "mommi": [
+          19,
+          22
+        ]
+      },
+      "cotton": {
+        "types": [
+          "woven"
+        ],
+        "organic_available": false
+      },
       "tencel": null,
       "bamboo": null,
       "dyeing": true,
@@ -294,7 +599,14 @@
       "moq_notes": "Small-batch friendly historic mill — relatively low MOQ. Confirm directly.",
       "verified": false,
       "verify_notes": "Verify silk product range and current dyeing services.",
-      "ethical_principles": "Heritage mill, small-batch production."
+      "ethical_principles": "Heritage mill, small-batch production.",
+      "price": {
+        "tier": "€€",
+        "source": "market_estimate",
+        "currency": "EUR",
+        "price_eur_per_meter": null,
+        "notes": "Heritage small-batch mill, mid-market pricing."
+      }
     },
     {
       "id": "tessitura-grisotto",
@@ -305,17 +617,36 @@
       "country": "Italy",
       "region": "Europe",
       "type": "weaver",
-      "materials": ["silk"],
-      "silk": { "mulberry": true, "mommi": [12, 16, 19, 22] },
+      "materials": [
+        "silk"
+      ],
+      "silk": {
+        "mulberry": true,
+        "mommi": [
+          12,
+          16,
+          19,
+          22
+        ]
+      },
       "cotton": null,
       "tencel": null,
       "bamboo": null,
       "dyeing": false,
-      "certifications": ["OEKO-TEX"],
+      "certifications": [
+        "OEKO-TEX"
+      ],
       "moq_notes": "B2B weaver — confirm MOQ directly.",
       "verified": false,
       "verify_notes": "Como-area silk weaver. Dyeing typically outsourced to local dye houses.",
-      "ethical_principles": "Italian textile district; verify chain partners."
+      "ethical_principles": "Italian textile district; verify chain partners.",
+      "price": {
+        "tier": "€€€",
+        "source": "market_estimate",
+        "currency": "EUR",
+        "price_eur_per_meter": null,
+        "notes": "Como silk weaver, premium B2B."
+      }
     }
   ]
 }
