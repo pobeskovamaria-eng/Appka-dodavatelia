@@ -106,6 +106,10 @@ with st.sidebar:
     )
     st.caption("ℹ️ " + tt("price_disclaimer"))
 
+    require_material_verified = st.checkbox(
+        tt("require_verified"), value=True, help=tt("require_verified_help")
+    )
+
     verified_only = st.checkbox(tt("verified_only"), value=False)
 
 
@@ -120,6 +124,7 @@ filters = Filters(
     certifications=set(certs),
     verified_only=verified_only,
     price_tiers=set(price_tiers),
+    require_material_verified=require_material_verified,
 )
 
 filtered = apply_filters(suppliers, filters)
@@ -150,8 +155,23 @@ def render_supplier_card(s: dict, inquiry_subject: str, inquiry_body: str) -> No
             st.write(badge)
             st.link_button(tt("open_website"), s.get("website", "#"))
 
-        materials_offered = ", ".join(s.get("materials", []))
-        st.write(f"**{tt('material')}:** {materials_offered}")
+        mv = s.get("material_verifications") or {}
+        mat_lines: list[str] = []
+        for m in s.get("materials", []):
+            v = mv.get(m) or {}
+            badge = tt("verified_material") if v.get("verified") else tt("unverified_material")
+            mat_lines.append(f"• **{m}** — {badge}")
+        st.markdown(f"**{tt('material')}:**\n" + "\n".join(mat_lines))
+
+        # Show evidence for verified materials
+        for m in s.get("materials", []):
+            v = mv.get(m) or {}
+            if v.get("verified") and (v.get("evidence_url") or v.get("evidence_quote")):
+                with st.expander(f"🔎 {tt('evidence_label')}: {m}", expanded=False):
+                    if v.get("evidence_url"):
+                        st.markdown(f"[{v['evidence_url']}]({v['evidence_url']})")
+                    if v.get("evidence_quote"):
+                        st.caption(f"*{tt('evidence_quote_label')}:* {v['evidence_quote']}")
 
         silk = s.get("silk") or {}
         if silk:
@@ -269,6 +289,8 @@ inquiry_subject, inquiry_body = build_inquiry(
 )
 
 with tab_curated:
+    if require_material_verified:
+        st.info(tt("verification_warning"))
     st.write(f"**{tt('count_results')}** {len(filtered)}")
     if not filtered:
         st.warning(tt("no_results"))

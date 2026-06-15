@@ -23,6 +23,7 @@ class Filters:
     certifications: set[str] = field(default_factory=set)
     verified_only: bool = False
     price_tiers: set[str] = field(default_factory=set)
+    require_material_verified: bool = True
 
 
 def load_suppliers() -> list[dict]:
@@ -84,6 +85,11 @@ def apply_filters(suppliers: list[dict], f: Filters) -> list[dict]:
         if f.price_tiers:
             s_tier = (s.get("price") or {}).get("tier")
             if s_tier not in f.price_tiers:
+                continue
+
+        if f.require_material_verified and f.materials:
+            mv = s.get("material_verifications") or {}
+            if not all((mv.get(m) or {}).get("verified") for m in f.materials):
                 continue
 
         out.append(s)

@@ -1,6 +1,6 @@
 {
-  "schema_version": 3,
-  "note": "Curated list of candidate mills / weavers / fabric manufacturers (NOT resellers of finished goods). Each entry must be verified directly with the supplier before placing orders — capabilities, MOQs, contact emails, prices and certifications change over time. Where a public email could not be confirmed, contact_email is null and the inquiry should be sent via contact_page. Price tiers (€/€€/€€€/€€€€) are market positioning estimates — B2B fabric mills do not publish per-meter prices publicly. Real prices come only via a written quote. Fill `price_eur_per_meter` once you receive quotes.",
+  "schema_version": 4,
+  "note": "Curated list of candidate mills / weavers / fabric manufacturers (NOT resellers). Each material is independently verified via material_verifications. A material with verified=false must NOT be relied upon — visit the supplier's website, confirm the material is in their stable B2B catalogue, then fill evidence_url + evidence_quote. B2B textile sites block automated crawling (Cloudflare), so verification is manual. Price tiers (€/€€/€€€/€€€€) are market estimates; real prices come from a written quote.",
   "suppliers": [
     {
       "id": "maeko-tessuti",
@@ -55,6 +55,36 @@
         "currency": "EUR",
         "price_eur_per_meter": null,
         "notes": "Small-batch friendly premium silk — accessible to emerging brands."
+      },
+      "material_verifications": {
+        "silk": {
+          "verified": true,
+          "evidence_url": "https://maekotessuti.com/",
+          "evidence_quote": "User-confirmed benchmark supplier — verified directly by app owner.",
+          "source": "user_confirmed",
+          "checked_at": "2026-06-15"
+        },
+        "cotton": {
+          "verified": true,
+          "evidence_url": "https://maekotessuti.com/",
+          "evidence_quote": "User-confirmed benchmark supplier — verified directly by app owner.",
+          "source": "user_confirmed",
+          "checked_at": "2026-06-15"
+        },
+        "tencel": {
+          "verified": true,
+          "evidence_url": "https://maekotessuti.com/",
+          "evidence_quote": "User-confirmed benchmark supplier — verified directly by app owner.",
+          "source": "user_confirmed",
+          "checked_at": "2026-06-15"
+        },
+        "linen": {
+          "verified": true,
+          "evidence_url": "https://maekotessuti.com/",
+          "evidence_quote": "User-confirmed benchmark supplier — verified directly by app owner.",
+          "source": "user_confirmed",
+          "checked_at": "2026-06-15"
+        }
       }
     },
     {
@@ -97,6 +127,15 @@
         "currency": "EUR",
         "price_eur_per_meter": null,
         "notes": "Haute-couture silk weaver — expect couture-level pricing."
+      },
+      "material_verifications": {
+        "silk": {
+          "verified": false,
+          "evidence_url": null,
+          "evidence_quote": null,
+          "source": "not_checked",
+          "checked_at": null
+        }
       }
     },
     {
@@ -147,6 +186,22 @@
         "currency": "EUR",
         "price_eur_per_meter": null,
         "notes": "Premium B2B — typical luxury brand supplier."
+      },
+      "material_verifications": {
+        "silk": {
+          "verified": false,
+          "evidence_url": null,
+          "evidence_quote": null,
+          "source": "not_checked",
+          "checked_at": null
+        },
+        "cotton": {
+          "verified": false,
+          "evidence_url": null,
+          "evidence_quote": null,
+          "source": "not_checked",
+          "checked_at": null
+        }
       }
     },
     {
@@ -195,6 +250,22 @@
         "currency": "EUR",
         "price_eur_per_meter": null,
         "notes": "Premium B2B silk + sustainable finishing."
+      },
+      "material_verifications": {
+        "silk": {
+          "verified": false,
+          "evidence_url": null,
+          "evidence_quote": null,
+          "source": "not_checked",
+          "checked_at": null
+        },
+        "cotton": {
+          "verified": false,
+          "evidence_url": null,
+          "evidence_quote": null,
+          "source": "not_checked",
+          "checked_at": null
+        }
       }
     },
     {
@@ -237,6 +308,15 @@
         "currency": "EUR",
         "price_eur_per_meter": null,
         "notes": "French silk weaver — premium pricing."
+      },
+      "material_verifications": {
+        "silk": {
+          "verified": false,
+          "evidence_url": null,
+          "evidence_quote": null,
+          "source": "not_checked",
+          "checked_at": null
+        }
       }
     },
     {
@@ -279,6 +359,15 @@
         "currency": "EUR",
         "price_eur_per_meter": null,
         "notes": "Premium cotton shirting — high-end positioning."
+      },
+      "material_verifications": {
+        "cotton": {
+          "verified": false,
+          "evidence_url": null,
+          "evidence_quote": null,
+          "source": "not_checked",
+          "checked_at": null
+        }
       }
     },
     {
@@ -322,6 +411,15 @@
         "currency": "EUR",
         "price_eur_per_meter": null,
         "notes": "Premium B2B cotton shirting, slightly more accessible than Albini."
+      },
+      "material_verifications": {
+        "cotton": {
+          "verified": false,
+          "evidence_url": null,
+          "evidence_quote": null,
+          "source": "not_checked",
+          "checked_at": null
+        }
       }
     },
     {
@@ -366,6 +464,22 @@
         "currency": "EUR",
         "price_eur_per_meter": null,
         "notes": "Sustainable jersey/woven specialist — accommodating to emerging brands."
+      },
+      "material_verifications": {
+        "tencel": {
+          "verified": false,
+          "evidence_url": null,
+          "evidence_quote": null,
+          "source": "not_checked",
+          "checked_at": null
+        },
+        "cotton": {
+          "verified": false,
+          "evidence_url": null,
+          "evidence_quote": null,
+          "source": "not_checked",
+          "checked_at": null
+        }
       }
     },
     {
@@ -408,6 +522,22 @@
         "currency": "EUR",
         "price_eur_per_meter": null,
         "notes": "Vertically integrated Portuguese mill, competitive B2B pricing."
+      },
+      "material_verifications": {
+        "cotton": {
+          "verified": false,
+          "evidence_url": null,
+          "evidence_quote": null,
+          "source": "not_checked",
+          "checked_at": null
+        },
+        "tencel": {
+          "verified": false,
+          "evidence_url": null,
+          "evidence_quote": null,
+          "source": "not_checked",
+          "checked_at": null
+        }
       }
     },
     {
@@ -450,49 +580,29 @@
         "currency": "EUR",
         "price_eur_per_meter": null,
         "notes": "Italian jersey mill, mid-market B2B."
-      }
-    },
-    {
-      "id": "lanificio-paoletti",
-      "name": "Lanificio Paoletti / Tessitura Paoletti",
-      "website": "https://www.lanificiopaoletti.it/",
-      "contact_page": "https://www.lanificiopaoletti.it/contatti/",
-      "contact_email": null,
-      "country": "Italy",
-      "region": "Europe",
-      "type": "weaver",
-      "materials": [
-        "wool",
-        "cotton",
-        "silk"
-      ],
-      "silk": {
-        "mulberry": true,
-        "mommi": [
-          19,
-          22
-        ]
       },
-      "cotton": {
-        "types": [
-          "woven"
-        ],
-        "organic_available": false
-      },
-      "tencel": null,
-      "bamboo": null,
-      "dyeing": true,
-      "certifications": [],
-      "moq_notes": "Small-batch friendly historic mill — relatively low MOQ. Confirm directly.",
-      "verified": false,
-      "verify_notes": "Verify silk product range and current dyeing services.",
-      "ethical_principles": "Heritage mill, small-batch production.",
-      "price": {
-        "tier": "€€",
-        "source": "market_estimate",
-        "currency": "EUR",
-        "price_eur_per_meter": null,
-        "notes": "Heritage small-batch mill, mid-market pricing."
+      "material_verifications": {
+        "tencel": {
+          "verified": false,
+          "evidence_url": null,
+          "evidence_quote": null,
+          "source": "not_checked",
+          "checked_at": null
+        },
+        "cotton": {
+          "verified": false,
+          "evidence_url": null,
+          "evidence_quote": null,
+          "source": "not_checked",
+          "checked_at": null
+        },
+        "linen": {
+          "verified": false,
+          "evidence_url": null,
+          "evidence_quote": null,
+          "source": "not_checked",
+          "checked_at": null
+        }
       }
     },
     {
@@ -533,6 +643,15 @@
         "currency": "EUR",
         "price_eur_per_meter": null,
         "notes": "Como silk weaver, premium B2B."
+      },
+      "material_verifications": {
+        "silk": {
+          "verified": false,
+          "evidence_url": null,
+          "evidence_quote": null,
+          "source": "not_checked",
+          "checked_at": null
+        }
       }
     },
     {
@@ -582,6 +701,22 @@
         "currency": "EUR",
         "price_eur_per_meter": null,
         "notes": "Premium luxury silk weaver — couture-level pricing."
+      },
+      "material_verifications": {
+        "silk": {
+          "verified": false,
+          "evidence_url": null,
+          "evidence_quote": null,
+          "source": "not_checked",
+          "checked_at": null
+        },
+        "cotton": {
+          "verified": false,
+          "evidence_url": null,
+          "evidence_quote": null,
+          "source": "not_checked",
+          "checked_at": null
+        }
       }
     },
     {
@@ -624,6 +759,15 @@
         "currency": "EUR",
         "price_eur_per_meter": null,
         "notes": "Premium B2B French silk weaver."
+      },
+      "material_verifications": {
+        "silk": {
+          "verified": false,
+          "evidence_url": null,
+          "evidence_quote": null,
+          "source": "not_checked",
+          "checked_at": null
+        }
       }
     },
     {
@@ -671,6 +815,22 @@
         "currency": "EUR",
         "price_eur_per_meter": null,
         "notes": "Haute-couture Lyon silk house."
+      },
+      "material_verifications": {
+        "silk": {
+          "verified": false,
+          "evidence_url": null,
+          "evidence_quote": null,
+          "source": "not_checked",
+          "checked_at": null
+        },
+        "cotton": {
+          "verified": false,
+          "evidence_url": null,
+          "evidence_quote": null,
+          "source": "not_checked",
+          "checked_at": null
+        }
       }
     },
     {
@@ -714,6 +874,15 @@
         "currency": "EUR",
         "price_eur_per_meter": null,
         "notes": "Accessible MOQs — mid-market positioning."
+      },
+      "material_verifications": {
+        "silk": {
+          "verified": false,
+          "evidence_url": null,
+          "evidence_quote": null,
+          "source": "not_checked",
+          "checked_at": null
+        }
       }
     },
     {
@@ -756,6 +925,15 @@
         "currency": "EUR",
         "price_eur_per_meter": null,
         "notes": "Mid-market Italian cotton weaver."
+      },
+      "material_verifications": {
+        "cotton": {
+          "verified": false,
+          "evidence_url": null,
+          "evidence_quote": null,
+          "source": "not_checked",
+          "checked_at": null
+        }
       }
     }
   ]

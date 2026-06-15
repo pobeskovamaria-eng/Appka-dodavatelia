@@ -1,0 +1,244 @@
+{
+  "maeko-tessuti": [
+    "maekotessuti.com",
+    {
+      "silk": {
+        "verified": false,
+        "evidence_url": null,
+        "evidence_quote": null,
+        "error": "https://www.bing.com/search?q=site%3Amaekotessuti.com+%28%22silk%22+OR+%22soie%2"
+      },
+      "cotton": {
+        "verified": false,
+        "evidence_url": null,
+        "evidence_quote": null,
+        "error": "https://www.bing.com/search?q=site%3Amaekotessuti.com+%28%22cotton%22+OR+%22coto"
+      },
+      "tencel": {
+        "verified": false,
+        "evidence_url": null,
+        "evidence_quote": null,
+        "error": "https://www.bing.com/search?q=site%3Amaekotessuti.com+%28%22tencel%22+OR+%22lyoc"
+      },
+      "linen": {
+        "verified": false,
+        "evidence_url": null,
+        "evidence_quote": null,
+        "error": "https://www.bing.com/search?q=site%3Amaekotessuti.com+%28%22linen%22+OR+%22lin%2"
+      }
+    }
+  ],
+  "taroni": [
+    "taronicomo.com",
+    {
+      "silk": {
+        "verified": false,
+        "evidence_url": null,
+        "evidence_quote": null,
+        "error": "https://www.bing.com/search?q=site%3Ataronicomo.com+%28%22silk%22+OR+%22soie%22+"
+      }
+    }
+  ],
+  "ratti": [
+    "ratti.it",
+    {
+      "silk": {
+        "verified": false,
+        "evidence_url": null,
+        "evidence_quote": null,
+        "error": "https://www.bing.com/search?q=site%3Aratti.it+%28%22silk%22+OR+%22soie%22+OR+%22"
+      },
+      "cotton": {
+        "verified": false,
+        "evidence_url": null,
+        "evidence_quote": null,
+        "error": "https://www.bing.com/search?q=site%3Aratti.it+%28%22cotton%22+OR+%22coton%22+OR+"
+      }
+    }
+  ],
+  "canepa": [
+    "canepa.it",
+    {
+      "silk": {
+        "verified": false,
+        "evidence_url": null,
+        "evidence_quote": null,
+        "error": "https://www.bing.com/search?q=site%3Acanepa.it+%28%22silk%22+OR+%22soie%22+OR+%2"
+      },
+      "cotton": {
+        "verified": false,
+        "evidence_url": null,
+        "evidence_quote": null,
+        "error": "https://www.bing.com/search?q=site%3Acanepa.it+%28%22cotton%22+OR+%22coton%22+OR"
+      }
+    }
+  ],
+  "belinac": [
+    "belinac.com",
+    {
+      "silk": {
+        "verified": false,
+        "evidence_url": null,
+        "evidence_quote": null,
+        "error": "https://www.bing.com/search?q=site%3Abelinac.com+%28%22silk%22+OR+%22soie%22+OR+"
+      }
+    }
+  ],
+  "albini": [
+    "albinigroup.com",
+    {
+      "cotton": {
+        "verified": false,
+        "evidence_url": null,
+        "evidence_quote": null,
+        "error": "https://www.bing.com/search?q=site%3Aalbinigroup.com+%28%22cotton%22+OR+%22coton"
+      }
+    }
+  ],
+  "canclini": [
+    "canclini.it",
+    {
+      "cotton": {
+        "verified": false,
+        "evidence_url": null,
+        "evidence_quote": null,
+        "error": "https://www.bing.com/search?q=site%3Acanclini.it+%28%22cotton%22+OR+%22coton%22+"
+      }
+    }
+  ],
+  "tintex": [
+    "tintextextiles.com",
+    {
+      "tencel": {
+        "verified": false,
+        "evidence_url": null,
+        "evidence_quote": null,
+        "error": "https://www.bing.com/search?q=site%3Atintextextiles.com+%28%22tencel%22+OR+%22ly"
+      },
+      "cotton": {
+        "verified": false,
+        "evidence_url": null,
+        "evidence_quote": null,
+        "error": "https://www.bing.com/search?q=site%3Atintextextiles.com+%28%22cotton%22+OR+%22co"
+      }
+    }
+  ],
+  "riopele": [
+    "riopele.pt",
+    {
+      "cotton": {
+        "verified": false,
+        "evidence_url": null,
+        "evidence_quote": null,
+        "error": "https://www.bing.com/search?q=site%3Ariopele.pt+%28%22cotton%22+OR+%22coton%22+O"
+      },
+      "tencel": {
+        "verified": false,
+        "evidence_url": null,
+        "evidence_quote": null,
+        "error": "https://www.bing.com/search?q=site%3Ariopele.pt+%28%22tencel%22+OR+%22lyocell%22"
+      }
+    }
+  ],
+  "lemar": [
+    "lemar.it",
+    {
+      "tencel": {
+        "verified": false,
+        "evidence_url": null,
+        "evidence_quote": null,
+        "error": "https://www.bing.com/search?q=site%3Alemar.it+%28%22tencel%22+OR+%22lyocell%22%2"
+      },
+      "cotton": {
+        "verified": false,
+        "evidence_url": null,
+        "evidence_quote": null,
+        "error": "https://www.bing.com/search?q=site%3Alemar.it+%28%22cotton%22+OR+%22coton%22+OR+"
+      },
+      "linen": {
+        "verified": false,
+        "evidence_url": null,
+        "evidence_quote": null,
+        "error": "https://www.bing.com/search?q=site%3Alemar.it+%28%22linen%22+OR+%22lin%22+OR+%22"
+      }
+    }
+  ],
+  "tessitura-grisotto": [
+    "grisotto.it",
+    {
+      "silk": {
+        "verified": false,
+        "evidence_url": null,
+        "evidence_quote": null,
+        "error": "https://www.bing.com/search?q=site%3Agrisotto.it+%28%22silk%22+OR+%22soie%22+OR+"
+      }
+    }
+  ],
+  "clerici-tessuto": [
+    "clericitessuto.it",
+    {
+      "silk": {
+        "verified": false,
+        "evidence_url": null,
+        "evidence_quote": null,
+        "error": "https://www.bing.com/search?q=site%3Aclericitessuto.it+%28%22silk%22+OR+%22soie%"
+      },
+      "cotton": {
+        "verified": false,
+        "evidence_url": null,
+        "evidence_quote": null,
+        "error": "https://www.bing.com/search?q=site%3Aclericitessuto.it+%28%22cotton%22+OR+%22cot"
+      }
+    }
+  ],
+  "brochier-soieries": [
+    "brochiersoieries1890.com",
+    {
+      "silk": {
+        "verified": false,
+        "evidence_url": null,
+        "evidence_quote": null,
+        "error": "https://www.bing.com/search?q=site%3Abrochiersoieries1890.com+%28%22silk%22+OR+%"
+      }
+    }
+  ],
+  "bianchini-ferier": [
+    "bianchini-ferier.com",
+    {
+      "silk": {
+        "verified": false,
+        "evidence_url": null,
+        "evidence_quote": null,
+        "error": "https://www.bing.com/search?q=site%3Abianchini-ferier.com+%28%22silk%22+OR+%22so"
+      },
+      "cotton": {
+        "verified": false,
+        "evidence_url": null,
+        "evidence_quote": null,
+        "error": "https://www.bing.com/search?q=site%3Abianchini-ferier.com+%28%22cotton%22+OR+%22"
+      }
+    }
+  ],
+  "pongees": [
+    "pongees.co.uk",
+    {
+      "silk": {
+        "verified": false,
+        "evidence_url": null,
+        "evidence_quote": null,
+        "error": "https://www.bing.com/search?q=site%3Apongees.co.uk+%28%22silk%22+OR+%22soie%22+O"
+      }
+    }
+  ],
+  "olmetex": [
+    "olmetex.it",
+    {
+      "cotton": {
+        "verified": false,
+        "evidence_url": null,
+        "evidence_quote": null,
+        "error": "https://www.bing.com/search?q=site%3Aolmetex.it+%28%22cotton%22+OR+%22coton%22+O"
+      }
+    }
+  ]
+}
