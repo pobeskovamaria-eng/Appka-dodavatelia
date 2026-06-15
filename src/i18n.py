@@ -90,6 +90,11 @@ STRINGS = {
         "material_bamboo": "bambus",
         "material_linen": "ľan",
         "material_wool": "vlnu",
+        "strict_mode": "Striktný režim (filtrovať irelevantné výsledky)",
+        "strict_help": "Po vyhľadaní odstráni výsledky bez požadovaného materiálu, marketplace odkazy (AliExpress, Amazon, Etsy...) a blogy.",
+        "query_sent_label": "Odoslaný dotaz na DuckDuckGo:",
+        "results_filtered": "Zobrazených {shown} relevantných z {total} vrátených.",
+        "query_tips": "💡 Tipy: úvodzovkami `\"\"` označíte presnú frázu, `-slovo` vylúčite, `OR` ponúkne alternatívy. Príklad: `\"mulberry silk\" (\"19 momme\" OR \"22 momme\") -aliexpress`",
     },
     "en": {
         "app_title": "Fabric Supplier Finder",
@@ -180,6 +185,11 @@ STRINGS = {
         "material_bamboo": "bamboo",
         "material_linen": "linen",
         "material_wool": "wool",
+        "strict_mode": "Strict mode (filter irrelevant results)",
+        "strict_help": "After search, drops results lacking the requested material, marketplace links (AliExpress, Amazon, Etsy...), and blogs.",
+        "query_sent_label": "Query sent to DuckDuckGo:",
+        "results_filtered": "Showing {shown} relevant of {total} returned.",
+        "query_tips": "💡 Tips: `\"\"` for exact phrase, `-word` to exclude, `OR` for alternatives. Example: `\"mulberry silk\" (\"19 momme\" OR \"22 momme\") -aliexpress`",
     },
 }
 

@@ -12,7 +12,7 @@ from src.i18n import t
 from src.inquiry import build_inquiry, mailto_link
 from src.pricing import format_range, indicative_range
 from src.search import Filters, all_certifications, apply_filters, load_suppliers
-from src.web_search import build_query, search_web
+from src.web_search import build_query, filter_results, search_web
 
 
 st.set_page_config(page_title="Fabric Supplier Finder", page_icon="🧵", layout="wide")
@@ -288,14 +288,36 @@ with tab_web:
         dyeing_required=dyeing_required,
         regions=regions,
     )
-    user_query = st.text_input(tt("web_query_label"), value=default_query)
+    user_query = st.text_area(
+        tt("web_query_label"),
+        value=default_query,
+        height=90,
+        help=tt("query_tips"),
+    )
+    st.caption(tt("query_tips"))
+
+    strict_mode = st.checkbox(
+        tt("strict_mode"), value=True, help=tt("strict_help")
+    )
 
     if st.button("🔍 " + tt("web_search_button"), type="primary"):
         with st.spinner(tt("web_searching")):
-            results = search_web(user_query, max_results=15)
+            raw_results = search_web(user_query, max_results=25)
+            results = (
+                filter_results(raw_results, materials=materials, strict=True)
+                if strict_mode
+                else raw_results
+            )
+
+        with st.expander(tt("query_sent_label"), expanded=False):
+            st.code(user_query, language="text")
+
         if not results:
             st.info(tt("web_no_results"))
         else:
+            st.caption(
+                tt("results_filtered").format(shown=len(results), total=len(raw_results))
+            )
             for r in results:
                 with st.container(border=True):
                     title = r.get("title") or r.get("href", "")
