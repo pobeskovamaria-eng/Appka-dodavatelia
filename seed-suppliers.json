@@ -1,0 +1,421 @@
+[
+  {
+    "name": "Verhees Textiles",
+    "website": "https://www.verheestextiles.com/en/",
+    "country": "Holandsko",
+    "city": "",
+    "language": "EN, NL",
+    "companyType": "velkoobchod",
+    "materials": [
+      { "name": "Organická bavlna", "verification": "neovereny" },
+      { "name": "TENCEL™", "verification": "neovereny" },
+      { "name": "Lyocell", "verification": "neovereny" },
+      { "name": "Modal", "verification": "neovereny" }
+    ],
+    "certifications": [
+      {
+        "name": "GOTS",
+        "onWebsite": true,
+        "verifiable": false,
+        "proofUrl": "https://www.verheestextiles.com/en/sustainability/gots",
+        "verifiedDate": "",
+        "note": "Tvrdia, že majú najväčšiu kolekciu GOTS organickej bavlny v EÚ; overiť konkrétne číslo v databáze global-standard.org.",
+        "status": "uvedene_ale_neoverene"
+      },
+      {
+        "name": "Lenzing TENCEL",
+        "onWebsite": true,
+        "verifiable": false,
+        "proofUrl": "https://www.verheestextiles.com/en/",
+        "verifiedDate": "",
+        "note": "Ponúkajú Lenzing EcoVero™ a TENCEL™. Treba overiť licenciu v Lenzing Pro.",
+        "status": "uvedene_ale_neoverene"
+      }
+    ],
+    "offersMulberry": "nie",
+    "momme19": "nie",
+    "momme22": "nie",
+    "b2b": "ano",
+    "sellsMeter": "ano",
+    "sellsWholesale": "ano",
+    "sendsSamples": "neoverene",
+    "shipsSlovakia": "neoverene",
+    "shipsEU": "ano",
+    "priceListAvail": "neoverene",
+    "hasCompanyInfo": true,
+    "hasAddress": true,
+    "hasClearContact": true,
+    "trustworthy": true,
+    "status": "predbezne_vhodny",
+    "rating": "vhodny",
+    "notes": "Pokrýva GOTS bavlnu + TENCEL v jednom B2B sklade v EÚ. Najmenej rizikový prvý krok. B2B only webshop, sklad 7 mil. m.",
+    "questions": "Vyžiadať GOTS certifikačné číslo, Lenzing licenčné číslo, podmienky pre malé objednávky a vzorky."
+  },
+  {
+    "name": "Silk Lab Italy",
+    "website": "https://www.silklabitaly.com/en/homepage-en/",
+    "country": "Taliansko",
+    "city": "Como",
+    "language": "EN, IT",
+    "companyType": "vyrobca",
+    "materials": [
+      { "name": "Morušový hodváb / mulberry silk", "verification": "neovereny" },
+      { "name": "Hodváb charmeuse", "verification": "neovereny" },
+      { "name": "Iné prírodné látky", "verification": "neovereny" }
+    ],
+    "certifications": [],
+    "offersMulberry": "ano",
+    "momme19": "neoverene",
+    "momme22": "neoverene",
+    "silkNote": "Como mlyny tradične vyrábajú v rozsahu 16–22+ momme. Vyžiadať konkrétnu váhu.",
+    "offersDyeing": "ano",
+    "customColors": "ano",
+    "labDip": "neoverene",
+    "pantoneMatching": "ano",
+    "customProduction": "ano",
+    "dyeingNote": "Pantone color matching deklarované. Como mlyny majú typicky čistú vodu vhodnú na farbenie hodvábu.",
+    "b2b": "ano",
+    "sellsMeter": "neoverene",
+    "sellsWholesale": "ano",
+    "shipsEU": "ano",
+    "hasCompanyInfo": true,
+    "trustworthy": true,
+    "status": "predbezne_vhodny",
+    "rating": "vhodny",
+    "notes": "Prémiový profil zodpovedá Maeko Tessuti. Treba rátať s vyšším MOQ a cenami. Pôvod vlákna treba overiť — Made in Italy sa zvyčajne vzťahuje na tkanie/farbenie, nie na pôvod hodvábu.",
+    "questions": "1) Aké momme stupne máte na sklade? 2) MOQ pre metráž a lab dip? 3) Aké certifikácie (OEKO-TEX, REACH)? 4) Odkiaľ pochádza hodvábny kokon?"
+  },
+  {
+    "name": "Suzhou Taihu Snow Silk",
+    "website": "https://taihusnow.com/",
+    "country": "Čína",
+    "city": "Suzhou",
+    "language": "EN, ZH",
+    "companyType": "vyrobca",
+    "materials": [
+      { "name": "Morušový hodváb / mulberry silk", "verification": "neovereny" },
+      { "name": "Hodváb charmeuse", "verification": "neovereny" }
+    ],
+    "certifications": [
+      {
+        "name": "OEKO-TEX Standard 100",
+        "onWebsite": true,
+        "verifiable": false,
+        "proofUrl": "https://taihusnow.com/taihu-snow-silk-with-oeko-tex.html",
+        "verifiedDate": "",
+        "note": "Vyžiadať certifikát s číslom a overiť v databáze oeko-tex.com.",
+        "status": "uvedene_ale_neoverene"
+      },
+      {
+        "name": "Silk Mark",
+        "onWebsite": true,
+        "verifiable": false,
+        "proofUrl": "",
+        "verifiedDate": "",
+        "note": "",
+        "status": "uvedene_ale_neoverene"
+      }
+    ],
+    "offersMulberry": "ano",
+    "momme19": "ano",
+    "momme22": "ano",
+    "otherMomme": "25",
+    "silkComposition": "100 % mulberry silk",
+    "silkNote": "Ponúkajú metráž v 19, 22 a 25 momme. Kótovaná spoločnosť (kód 920262).",
+    "b2b": "ano",
+    "sellsMeter": "ano",
+    "sellsWholesale": "ano",
+    "moq": "Pre hotové produkty 100 ks; pre metráž treba overiť",
+    "shipsEU": "neoverene",
+    "hasCompanyInfo": true,
+    "hasAddress": true,
+    "trustworthy": true,
+    "status": "predbezne_vhodny",
+    "rating": "vhodny",
+    "notes": "Predáva aj hotové produkty (pyžamá, povlaky), ale metráž je samostatná kategória. Adresa: No. 2428, Zhenze 318 National Road, Suzhou.",
+    "questions": "1) Pošlite OEKO-TEX certifikát s číslom a test report pre 19/22 momme. 2) MOQ pre metráž (m)? 3) Dodávate do EÚ a aké sú podmienky?"
+  },
+  {
+    "name": "HerMin Textile",
+    "website": "https://www.hermin.com/product-tencel-fabric.html",
+    "country": "Taiwan",
+    "city": "",
+    "language": "EN, ZH",
+    "companyType": "tkacovna",
+    "materials": [
+      { "name": "TENCEL™", "verification": "neovereny" },
+      { "name": "Lyocell", "verification": "neovereny" }
+    ],
+    "certifications": [
+      {
+        "name": "Lenzing TENCEL",
+        "onWebsite": true,
+        "verifiable": false,
+        "proofUrl": "https://www.hermin.com/product-tencel-fabric.html",
+        "verifiedDate": "",
+        "note": "Tvrdí, že je Lenzing certifikovaný; overiť priamo cez Lenzing Pro.",
+        "status": "uvedene_ale_neoverene"
+      }
+    ],
+    "offersMulberry": "nie",
+    "b2b": "ano",
+    "sellsWholesale": "ano",
+    "hasCompanyInfo": true,
+    "status": "predbezne_vhodny",
+    "rating": "vhodny",
+    "notes": "Lenzing certifikovaný TENCEL lyocell bez coatingu. Alternatíva k Verhees pre TENCEL časť portfólia.",
+    "questions": "1) Pošlite Lenzing licenčné číslo. 2) MOQ pre metráž? 3) Pantone matching alebo lab dip? 4) Dodávate do EÚ?"
+  },
+  {
+    "name": "Boyue Textile",
+    "website": "https://www.boyuefabric.com/Tencel-fabric/",
+    "country": "Čína",
+    "city": "",
+    "language": "EN, ZH",
+    "companyType": "tkacovna",
+    "materials": [
+      { "name": "TENCEL™", "verification": "neovereny" },
+      { "name": "Lyocell", "verification": "neovereny" }
+    ],
+    "certifications": [
+      {
+        "name": "Lenzing TENCEL",
+        "onWebsite": true,
+        "verifiable": false,
+        "proofUrl": "https://www.boyuefabric.com/Tencel-fabric/",
+        "verifiedDate": "",
+        "note": "Lenzing certifikovaný mlyn — overiť licenciu.",
+        "status": "uvedene_ale_neoverene"
+      }
+    ],
+    "offersMulberry": "nie",
+    "b2b": "ano",
+    "sellsWholesale": "ano",
+    "hasCompanyInfo": true,
+    "status": "caka_na_preverenie",
+    "rating": "vhodny",
+    "notes": "Záloha k HerMin pre TENCEL. Pri čínskych dodávateľoch preveriť aj sociálne a environmentálne podmienky výroby.",
+    "questions": "1) Lenzing licenčné číslo. 2) MOQ. 3) Doprava do EÚ. 4) Sociálne audity (BSCI, Sedex)?"
+  },
+  {
+    "name": "W.ELL Fabric (Bao Lan Textile)",
+    "website": "https://wellfabric.com/",
+    "country": "Vietnam",
+    "city": "",
+    "language": "EN, VI",
+    "companyType": "vyrobca",
+    "materials": [
+      { "name": "Bambusový lyocell", "verification": "neovereny" },
+      { "name": "Bambusová viskóza", "verification": "neovereny" }
+    ],
+    "certifications": [
+      {
+        "name": "GOTS",
+        "onWebsite": true,
+        "verifiable": false,
+        "proofUrl": "https://wellfabric.com/",
+        "verifiedDate": "",
+        "note": "Tvrdia GOTS — overiť v databáze.",
+        "status": "uvedene_ale_neoverene"
+      },
+      {
+        "name": "OEKO-TEX Standard 100",
+        "onWebsite": true,
+        "verifiable": false,
+        "proofUrl": "https://wellfabric.com/",
+        "verifiedDate": "",
+        "note": "",
+        "status": "uvedene_ale_neoverene"
+      },
+      {
+        "name": "GRS",
+        "onWebsite": true,
+        "verifiable": false,
+        "proofUrl": "",
+        "verifiedDate": "",
+        "note": "Global Recycled Standard — relevantné pre bambusovú viskózu menej.",
+        "status": "uvedene_ale_neoverene"
+      }
+    ],
+    "offersMulberry": "nie",
+    "b2b": "ano",
+    "sellsWholesale": "ano",
+    "hasCompanyInfo": true,
+    "countryOfMake": true,
+    "status": "caka_na_preverenie",
+    "rating": "vhodny",
+    "notes": "Tvrdia Made in Vietnam s CO dokumentáciou. Bambusová viskóza je chemicky náročná — uprednostni lyocell-bambus.",
+    "questions": "1) Je to bambusový lyocell (closed-loop) alebo viskóza? 2) Pošlite GOTS a OEKO-TEX certifikáty s číslami. 3) MOQ a doprava do EÚ?"
+  },
+  {
+    "name": "Sinosilk",
+    "website": "https://sino-silk.com/silk-fabric/",
+    "country": "Čína",
+    "city": "Hangzhou",
+    "language": "EN, ZH",
+    "companyType": "neoverene",
+    "materials": [
+      { "name": "Morušový hodváb / mulberry silk", "verification": "neovereny" },
+      { "name": "Hodváb charmeuse", "verification": "neovereny" }
+    ],
+    "certifications": [
+      {
+        "name": "OEKO-TEX Standard 100",
+        "onWebsite": true,
+        "verifiable": false,
+        "proofUrl": "",
+        "verifiedDate": "",
+        "note": "Deklarujú „6A grade\" silk a OEKO-TEX — 6A nie je nezávislá certifikácia, treba overiť OEKO-TEX číslo.",
+        "status": "uvedene_ale_neoverene"
+      }
+    ],
+    "offersMulberry": "ano",
+    "momme19": "ano",
+    "momme22": "ano",
+    "otherMomme": "25, 30",
+    "offersDyeing": "neoverene",
+    "customColors": "neoverene",
+    "b2b": "ano",
+    "sellsMeter": "ano",
+    "greenwashingRisk": true,
+    "status": "caka_na_preverenie",
+    "rating": "mozno_vhodny",
+    "notes": "Nejasné, či je skutočný mlyn alebo trader. Existencia viacerých podobných doménových mien (snsilk.com, sinyoosilk.com) vyvoláva otázky.",
+    "questions": "1) Pošlite registráciu firmy a video z tkáčovne. 2) OEKO-TEX číslo. 3) Test report 19/22 momme od tretej strany."
+  },
+  {
+    "name": "SN Silk",
+    "website": "https://snsilk.com/",
+    "country": "Čína",
+    "city": "",
+    "language": "EN",
+    "companyType": "neoverene",
+    "materials": [
+      { "name": "Morušový hodváb / mulberry silk", "verification": "neovereny" },
+      { "name": "Hodváb charmeuse", "verification": "neovereny" }
+    ],
+    "certifications": [
+      {
+        "name": "OEKO-TEX Standard 100",
+        "onWebsite": true,
+        "verifiable": false,
+        "proofUrl": "https://snsilk.com/Luxury-22-Momme-Mulberry-Satin-Silk-Fabric/",
+        "verifiedDate": "",
+        "note": "",
+        "status": "uvedene_ale_neoverene"
+      }
+    ],
+    "offersMulberry": "ano",
+    "momme22": "ano",
+    "silkWidth": "114 cm",
+    "silkNote": "Deklarujú 22 momme charmeuse, 90+ stock farieb, MOQ od 1 m — typické skôr pre trader než tkáčovňu.",
+    "offersDyeing": "neoverene",
+    "customColors": "neoverene",
+    "b2b": "ano",
+    "sellsMeter": "ano",
+    "moq": "od 1 m",
+    "greenwashingRisk": true,
+    "status": "caka_na_preverenie",
+    "rating": "mozno_vhodny",
+    "notes": "MOQ 1 m naznačuje, že ide skôr o sprostredkovateľa než priameho výrobcu.",
+    "questions": "1) Ste výrobca alebo trader? 2) Pošlite OEKO-TEX certifikát s číslom. 3) MOQ pre custom dye?"
+  },
+  {
+    "name": "J P Handloom / JPH Exports",
+    "website": "https://www.jphandloom.in/mulberry-silk-fabric.html",
+    "country": "India",
+    "city": "Bhubaneswar",
+    "language": "EN",
+    "companyType": "vyrobca",
+    "materials": [
+      { "name": "Morušový hodváb / mulberry silk", "verification": "neovereny" },
+      { "name": "Hodváb charmeuse", "verification": "neovereny" }
+    ],
+    "certifications": [
+      {
+        "name": "OEKO-TEX Standard 100",
+        "onWebsite": true,
+        "verifiable": false,
+        "proofUrl": "https://www.jphandloom.in/mulberry-silk-fabric.html",
+        "verifiedDate": "",
+        "note": "",
+        "status": "uvedene_ale_neoverene"
+      }
+    ],
+    "offersMulberry": "ano",
+    "momme19": "neoverene",
+    "momme22": "neoverene",
+    "silkWidth": "114 cm",
+    "silkComposition": "100 % mulberry silk satin crepe charmeuse, 80 g/m²",
+    "silkNote": "Gramáž 80 g/m² zodpovedá cca 18–19 momme, ale treba presný prepočet od dodávateľa.",
+    "b2b": "ano",
+    "sellsMeter": "ano",
+    "hasCompanyInfo": true,
+    "status": "caka_na_preverenie",
+    "rating": "mozno_vhodny",
+    "notes": "„Organic mulberry silk\" je atypické tvrdenie — GOTS pre silk takmer nikdy plne neplatí. Pýtať sa, ako je organic verifikované.",
+    "questions": "1) Aký je presný momme stupeň (nie gramáž)? 2) OEKO-TEX číslo. 3) Ako je „organic\" verifikované? 4) MOQ, doprava do EÚ."
+  },
+  {
+    "name": "Nooteboom Textiles",
+    "website": "https://www.nooteboomtextiles.com/collections/gots-global-organic-textile-standard",
+    "country": "Holandsko",
+    "city": "",
+    "language": "EN, NL",
+    "companyType": "velkoobchod",
+    "materials": [
+      { "name": "Organická bavlna", "verification": "neovereny" },
+      { "name": "100 % bavlna", "verification": "neovereny" }
+    ],
+    "certifications": [
+      {
+        "name": "GOTS",
+        "onWebsite": true,
+        "verifiable": false,
+        "proofUrl": "https://www.nooteboomtextiles.com/collections/gots-global-organic-textile-standard",
+        "verifiedDate": "",
+        "note": "",
+        "status": "uvedene_ale_neoverene"
+      }
+    ],
+    "offersMulberry": "nie",
+    "b2b": "ano",
+    "sellsMeter": "ano",
+    "sellsWholesale": "ano",
+    "shipsEU": "ano",
+    "hasCompanyInfo": true,
+    "status": "caka_na_preverenie",
+    "rating": "mozno_vhodny",
+    "notes": "Záloha k Verhees. Menej špecializovaný, bez hodvábu / TENCEL portfólia.",
+    "questions": "1) GOTS certifikačné číslo. 2) Máte TENCEL alebo bambus? 3) MOQ a vzorky?"
+  },
+  {
+    "name": "ExploreTex",
+    "website": "https://exploretex.com/organic-cotton-fabric-suppliers-portugal/",
+    "country": "Portugalsko",
+    "city": "",
+    "language": "EN, PT",
+    "companyType": "agent",
+    "materials": [
+      { "name": "Organická bavlna", "verification": "neovereny" }
+    ],
+    "certifications": [
+      {
+        "name": "GOTS",
+        "onWebsite": true,
+        "verifiable": false,
+        "proofUrl": "",
+        "verifiedDate": "",
+        "note": "Tvrdia, že pracujú s GOTS mlynmi v Portugalsku z regeneratívnych fariem.",
+        "status": "uvedene_ale_neoverene"
+      }
+    ],
+    "offersMulberry": "nie",
+    "b2b": "ano",
+    "greenwashingRisk": true,
+    "status": "caka_na_preverenie",
+    "rating": "mozno_vhodny",
+    "notes": "Skôr sprostredkovateľská sieť ako jeden konkrétny mlyn — môže zvýšiť cenu a znížiť transparentnosť.",
+    "questions": "1) Pošlite zoznam konkrétnych GOTS mlynov a ich certifikačné čísla. 2) Aká je vaša marža a kontakt priamo na mlyn?"
+  }
+]

@@ -10,6 +10,7 @@ import {
   labelOf,
 } from "@/lib/constants";
 import { RatingBadge, StatusChip } from "./StatusBadge";
+import { ImportButton } from "./ImportButton";
 
 type SortKey = "score" | "name" | "country" | "rating" | "lastCheck" | "updated";
 type SortDir = "asc" | "desc";
@@ -243,6 +244,7 @@ export function SuppliersList({ suppliers }: { suppliers: Supplier[] }) {
             <a href="/api/export?format=json" className="btn">
               Export JSON
             </a>
+            <ImportButton />
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3">

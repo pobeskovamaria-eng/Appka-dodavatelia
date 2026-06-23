@@ -27,6 +27,12 @@ Aplikácia bude dostupná na [http://localhost:3000](http://localhost:3000).
 
 Pri prvom spustení sa automaticky vytvorí priečinok `data/` a SQLite súbor `data/suppliers.db`.
 
+### Naplnenie počiatočnými dátami
+
+V repo je súbor `seed-suppliers.json` s 11 dodávateľmi z prvého výskumu (Verhees Textiles, Silk Lab Italy, Suzhou Taihu Snow Silk, HerMin, Boyue, W.ELL Fabric, Sinosilk, SN Silk, J P Handloom, Nooteboom, ExploreTex).
+
+V zozname **Dodávatelia** klikni na **Import JSON** a vyber tento súbor. Certifikácie sú zámerne uložené ako *uvedené, ale neoverené* – pred dôveryhodnosťou over čísla v oficiálnych databázach (GOTS, OEKO-TEX, Lenzing Pro).
+
 ### Produkčné spustenie (voliteľné)
 
 ```bash
