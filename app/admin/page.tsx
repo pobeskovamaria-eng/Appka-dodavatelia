@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
@@ -72,12 +73,20 @@ function Section({
         {rows.map((s) => (
           <li key={s.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
             <div className="min-w-0">
-              <div className="font-medium">{s.name}</div>
+              <Link href={`/admin/supplier/${s.id}`} className="font-medium hover:underline">
+                {s.name}
+              </Link>
               <div className="text-xs text-neutral-500">
                 {[s.city, s.country, s.website].filter(Boolean).join(" · ")} · zdroj: {s.source ?? "—"}
               </div>
             </div>
             <div className="flex gap-2">
+              <Link
+                href={`/admin/supplier/${s.id}`}
+                className="rounded border px-3 py-1 text-xs hover:bg-neutral-50"
+              >
+                Detail / látky
+              </Link>
               {s.status !== "published" && (
                 <form action={action}>
                   <input type="hidden" name="id" value={s.id} />

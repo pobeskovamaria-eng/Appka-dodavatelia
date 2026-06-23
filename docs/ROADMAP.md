@@ -22,7 +22,7 @@ Cieľ: dostať do DB prvých 200–500 dodávateľov z SK/CZ/PL a mať ich filte
 
 Cieľ: detaily ponuky látok a menej duplicit.
 
-- [ ] **Editácia `fabrics` v admin review** — pri schvaľovaní pridať formulár na vyplnenie gramáže, MOQ, certifikátov, materiálu.
+- [x] **Editácia `fabrics` v admin review** — `/admin/supplier/[id]` s formulárom na pridanie/editáciu/zmazanie látok (gramáž, šírka, MOQ, materiál, certifikáty, farby).
 - [ ] **Fuzzy dedup** — `pg_trgm` similarity nad `name + city`; v review zobraziť „možný duplikát z X".
 - [ ] **UI Zlúčiť dodávateľov** — admin akcia ktorá zmerguje `fabrics` z duplicitných záznamov a oznací duplikát ako `rejected`.
 - [ ] **Logo upload** — Supabase Storage bucket `supplier-logos`, admin form na upload, ukladanie do `suppliers.logo_url`.
