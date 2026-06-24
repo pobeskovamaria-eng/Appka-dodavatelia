@@ -93,6 +93,12 @@ function Filters({ current }: { current: SearchParams }) {
         <option value="SK">Slovensko</option>
         <option value="CZ">Česko</option>
         <option value="PL">Poľsko</option>
+        <option value="IT">Taliansko</option>
+        <option value="DE">Nemecko</option>
+        <option value="AT">Rakúsko</option>
+        <option value="FR">Francúzsko</option>
+        <option value="ES">Španielsko</option>
+        <option value="PT">Portugalsko</option>
       </select>
       <select name="material" defaultValue={current.material ?? ""} className="rounded border px-3 py-2 text-sm">
         <option value="">Všetky materiály</option>

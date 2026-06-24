@@ -21,6 +21,12 @@ const COUNTRY_MAP: Record<string, string> = {
   slovakia: "SK", slovensko: "SK", sk: "SK",
   czechia: "CZ", czechrepublic: "CZ", cesko: "CZ", "českárepublika": "CZ", cz: "CZ",
   poland: "PL", polsko: "PL", polska: "PL", pl: "PL",
+  italy: "IT", italia: "IT", taliansko: "IT", włochy: "IT", it: "IT",
+  germany: "DE", deutschland: "DE", nemecko: "DE", de: "DE",
+  austria: "AT", rakusko: "AT", "rakúsko": "AT", at: "AT",
+  france: "FR", francúzsko: "FR", francuzsko: "FR", fr: "FR",
+  spain: "ES", "španielsko": "ES", espana: "ES", "españa": "ES", es: "ES",
+  portugal: "PT", portugalsko: "PT", pt: "PT",
 };
 
 export function cleanDomain(input: unknown): string | null {
