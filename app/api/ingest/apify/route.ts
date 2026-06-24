@@ -76,7 +76,8 @@ export async function POST(request: Request) {
       .upsert(withWebsite, { onConflict: "website", ignoreDuplicates: false })
       .select("id");
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      console.error("ingest upsert failed", { code: error.code, message: error.message, details: error.details, hint: error.hint });
+      return NextResponse.json({ error: error.message, code: error.code, details: error.details }, { status: 500 });
     }
     upserted += data?.length ?? 0;
   }
@@ -88,7 +89,8 @@ export async function POST(request: Request) {
       .insert(withoutWebsite)
       .select("id");
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      console.error("ingest insert failed", { code: error.code, message: error.message, details: error.details, hint: error.hint });
+      return NextResponse.json({ error: error.message, code: error.code, details: error.details }, { status: 500 });
     }
     inserted += data?.length ?? 0;
   }
