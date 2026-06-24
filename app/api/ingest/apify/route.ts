@@ -8,7 +8,32 @@ import { normalizeSupplier, type RawSupplier } from "@/lib/normalize";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
+// Pomocný GET endpoint na manuálne pretriggerovanie ingestu pre konkrétny dataset.
+// Použitie: GET /api/ingest/apify?secret=...&datasetId=XIPylQWl1eJKXBDsD
+// Užitočné keď webhook zlyhal a chceme znovu spracovať existujúci dataset bez nového scrapingu.
+export async function GET(request: Request) {
+  const url = new URL(request.url);
+  const datasetId = url.searchParams.get("datasetId");
+  if (!datasetId) {
+    return NextResponse.json(
+      { error: "missing datasetId query param" },
+      { status: 400 }
+    );
+  }
+  return handleIngest(request, { resource: { defaultDatasetId: datasetId } });
+}
+
 export async function POST(request: Request) {
+  let body: any;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "invalid json" }, { status: 400 });
+  }
+  return handleIngest(request, body);
+}
+
+async function handleIngest(request: Request, body: any) {
   const url = new URL(request.url);
   const providedSecret = url.searchParams.get("secret");
   const expectedSecret = process.env.APIFY_WEBHOOK_SECRET;
@@ -19,13 +44,6 @@ export async function POST(request: Request) {
   const apifyToken = process.env.APIFY_TOKEN;
   if (!apifyToken) {
     return NextResponse.json({ error: "APIFY_TOKEN missing" }, { status: 500 });
-  }
-
-  let body: any;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "invalid json" }, { status: 400 });
   }
 
   const datasetId: string | undefined =
