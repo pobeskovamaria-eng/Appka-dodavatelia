@@ -6,13 +6,14 @@ export const dynamic = "force-dynamic";
 export default async function SupplierDetail({ params }: { params: { slug: string } }) {
   const supabase = createSupabaseServerClient();
 
-  const { data: supplier } = await supabase
+  const { data } = await supabase
     .from("suppliers")
     .select("*, fabrics(*)")
     .eq("slug", params.slug)
     .eq("status", "published")
-    .maybeSingle();
+    .limit(1);
 
+  const supplier = data?.[0];
   if (!supplier) notFound();
 
   return (
