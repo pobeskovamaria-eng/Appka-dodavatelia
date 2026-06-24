@@ -84,8 +84,23 @@ async function handleIngest(request: Request, body: any) {
   //    Záznamy bez webu necháme prejsť ako insert; dedup zvládne admin pri review.
   const admin = createSupabaseAdminClient();
 
-  const withWebsite = normalized.filter((n) => n.website);
+  const withWebsiteRaw = normalized.filter((n) => n.website);
   const withoutWebsite = normalized.filter((n) => !n.website);
+
+  // V batchi môže Apify vrátiť viacero záznamov s rovnakou doménou (duplicitné Google Maps
+  // listingy). Postgres ON CONFLICT DO UPDATE neprejde rovnaký conflict key dvakrát v jednom
+  // statement — chyba 21000. Posledný výskyt vyhráva, ostatné spadnú.
+  const seen = new Set<string>();
+  const withWebsite = withWebsiteRaw
+    .slice()
+    .reverse()
+    .filter((n) => {
+      const key = n.website!;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .reverse();
 
   let upserted = 0;
   if (withWebsite.length > 0) {
