@@ -32,7 +32,7 @@ export default async function AdminPage() {
   const admin = createSupabaseAdminClient();
   const { data: pending } = await admin
     .from("suppliers")
-    .select("id, name, website, country, city, source, source_url, status, created_at")
+    .select("id, name, website, country, city, source, source_url, status, created_at, raw")
     .order("created_at", { ascending: false })
     .limit(200);
 
@@ -76,6 +76,9 @@ function Section({
               <Link href={`/admin/supplier/${s.id}`} className="font-medium hover:underline">
                 {s.name}
               </Link>
+              {s.raw?.categoryName && (
+                <CategoryBadge category={s.raw.categoryName} />
+              )}
               <div className="text-xs text-neutral-500">
                 {[s.city, s.country, s.website].filter(Boolean).join(" · ")} · zdroj: {s.source ?? "—"}
               </div>
@@ -116,5 +119,33 @@ function Section({
         ))}
       </ul>
     </section>
+  );
+}
+
+const WHOLESALE_HINTS = [
+  "ingrosso", "produzione", "manifattura", "lanificio", "tessitura",
+  "fornitore", "industria", "fabbrica", "wholesale", "manufacturer",
+  "supplier", "mill", "veľkoobchod", "výroba", "výrobca",
+];
+
+const RETAIL_HINTS = [
+  "negozio", "boutique", "abbigliamento", "store", "shop",
+  "predajňa", "obchod",
+];
+
+function CategoryBadge({ category }: { category: string }) {
+  const lower = category.toLowerCase();
+  const isWholesale = WHOLESALE_HINTS.some((w) => lower.includes(w));
+  const isRetail = RETAIL_HINTS.some((w) => lower.includes(w));
+  const className =
+    isWholesale && !isRetail
+      ? "bg-emerald-100 text-emerald-800"
+      : isRetail
+      ? "bg-red-100 text-red-800"
+      : "bg-neutral-200 text-neutral-700";
+  return (
+    <span className={`ml-2 inline-block rounded px-1.5 py-0.5 text-[10px] ${className}`}>
+      {category}
+    </span>
   );
 }
