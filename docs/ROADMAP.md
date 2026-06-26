@@ -30,6 +30,7 @@ Cieľ: detaily ponuky látok a menej duplicit.
 
 ## Phase 2 — pridanie zdrojov a atribútov
 
+- [x] **AI extrakcia látok z webu** — tlačidlo *Doplniť látky z webu (AI)* v admin detaile (`lib/extract-fabrics.ts`). Claude (`claude-opus-4-8`) cez web_fetch načíta web dodávateľa a vyplní `fabrics` (materiál, zloženie, gramáž, MOQ, certifikáty, farby). Vyžaduje `ANTHROPIC_API_KEY`.
 - [ ] **Web scraper Actor** špecifický pre B2B textil katalógy (napr. textil.cz, B2B portály) — vlastný normalizer.
 - [ ] **Materiálový classifier** — z `description` a názvu kolekcií odvodiť pravdepodobné `material_type` (jednoduché keyword matching, neskôr LLM).
 - [ ] **Rozsah filtrov** — gramáž (`weight_gsm` range), MOQ max, šírka.

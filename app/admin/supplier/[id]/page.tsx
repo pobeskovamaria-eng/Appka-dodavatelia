@@ -3,8 +3,11 @@ import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { extractFabricsFromWebsite, MATERIAL_CODES } from "@/lib/extract-fabrics";
 
 export const dynamic = "force-dynamic";
+// Extrakcia cez web_fetch + Claude môže trvať dlhšie — daj serverless funkcii viac času.
+export const maxDuration = 60;
 
 // ---------- Server actions ----------
 
@@ -115,9 +118,72 @@ async function setSupplierStatus(formData: FormData) {
   revalidatePath("/admin");
 }
 
+// Automaticky doplní látky z webu dodávateľa cez Claude (web_fetch + extrakcia).
+async function autofillFabrics(formData: FormData) {
+  "use server";
+  await requireAdmin();
+  const supplierId = String(formData.get("supplier_id"));
+  if (!supplierId) return;
+
+  const admin = createSupabaseAdminClient();
+  const { data: supplier } = await admin
+    .from("suppliers")
+    .select("id, name, website")
+    .eq("id", supplierId)
+    .maybeSingle();
+
+  if (!supplier?.website) {
+    redirect(`/admin/supplier/${supplierId}?ai=nodomain`);
+  }
+
+  let outcome = "ok";
+  let added = 0;
+  try {
+    const { fabrics } = await extractFabricsFromWebsite({
+      name: supplier.name,
+      website: supplier.website,
+    });
+
+    const rows = fabrics.slice(0, 20).map((f) => ({
+      supplier_id: supplierId,
+      name: typeof f.name === "string" && f.name.trim() ? f.name.trim() : null,
+      composition:
+        typeof f.composition === "string" && f.composition.trim() ? f.composition.trim() : null,
+      weight_gsm: Number.isFinite(f.weight_gsm as number) ? f.weight_gsm : null,
+      width_cm: Number.isFinite(f.width_cm as number) ? f.width_cm : null,
+      moq: Number.isFinite(f.moq as number) ? f.moq : null,
+      moq_unit: f.moq_unit === "m" || f.moq_unit === "kg" ? f.moq_unit : null,
+      material_type: (Array.isArray(f.material_type) ? f.material_type : []).filter((m) =>
+        (MATERIAL_CODES as readonly string[]).includes(m)
+      ),
+      certifications: Array.isArray(f.certifications) ? f.certifications : [],
+      colors: Array.isArray(f.colors) ? f.colors : [],
+    }));
+
+    if (rows.length > 0) {
+      const { error } = await admin.from("fabrics").insert(rows);
+      if (error) throw error;
+    }
+    added = rows.length;
+    if (added === 0) outcome = "empty";
+  } catch (e: any) {
+    console.error("autofill fabrics failed", e?.message ?? e);
+    outcome = "error";
+  }
+
+  revalidatePath(`/admin/supplier/${supplierId}`);
+  redirect(`/admin/supplier/${supplierId}?ai=${outcome}&n=${added}`);
+}
+
 // ---------- Page ----------
 
-export default async function AdminSupplierDetail({ params }: { params: { id: string } }) {
+export default async function AdminSupplierDetail({
+  params,
+  searchParams,
+}: {
+  params: { id: string };
+  searchParams: { ai?: string; n?: string };
+}) {
   await requireAdmin();
   const admin = createSupabaseAdminClient();
 
@@ -137,6 +203,8 @@ export default async function AdminSupplierDetail({ params }: { params: { id: st
         </Link>
         <StatusBadge status={supplier.status} />
       </div>
+
+      <AiBanner ai={searchParams.ai} n={searchParams.n} />
 
       <header className="rounded border bg-white p-4">
         <h1 className="text-2xl font-semibold">{supplier.name}</h1>
@@ -158,12 +226,25 @@ export default async function AdminSupplierDetail({ params }: { params: { id: st
               <button className="rounded bg-neutral-200 px-3 py-1 text-xs">Zamietnuť</button>
             </form>
           )}
+          {supplier.website && (
+            <form action={autofillFabrics}>
+              <input type="hidden" name="supplier_id" value={supplier.id} />
+              <button className="rounded bg-indigo-600 px-3 py-1 text-xs text-white">
+                Doplniť látky z webu (AI)
+              </button>
+            </form>
+          )}
           {supplier.source_url && (
             <a href={supplier.source_url} target="_blank" rel="noreferrer" className="rounded border px-3 py-1 text-xs">
               Zdroj
             </a>
           )}
         </div>
+        {supplier.website && (
+          <p className="mt-2 text-xs text-neutral-500">
+            AI načíta {supplier.website} a pokúsi sa vyplniť materiály, gramáž, MOQ a certifikáty. Vždy skontroluj výsledok.
+          </p>
+        )}
       </header>
 
       <section className="rounded border bg-white p-4">
@@ -203,6 +284,31 @@ export default async function AdminSupplierDetail({ params }: { params: { id: st
 }
 
 // ---------- Helpers ----------
+
+function AiBanner({ ai, n }: { ai?: string; n?: string }) {
+  if (!ai) return null;
+  const map: Record<string, { cls: string; msg: string }> = {
+    ok: {
+      cls: "border-emerald-200 bg-emerald-50 text-emerald-800",
+      msg: `AI doplnila ${n ?? 0} látok. Skontroluj a uprav ich nižšie.`,
+    },
+    empty: {
+      cls: "border-amber-200 bg-amber-50 text-amber-800",
+      msg: "AI na webe nenašla použiteľné informácie o látkach. Doplň ich ručne.",
+    },
+    nodomain: {
+      cls: "border-amber-200 bg-amber-50 text-amber-800",
+      msg: "Dodávateľ nemá vyplnený web, AI nemá z čoho čerpať.",
+    },
+    error: {
+      cls: "border-red-200 bg-red-50 text-red-700",
+      msg: "Extrakcia zlyhala. Skontroluj, či je nastavený ANTHROPIC_API_KEY, a skús znova.",
+    },
+  };
+  const entry = map[ai];
+  if (!entry) return null;
+  return <div className={`rounded border p-3 text-sm ${entry.cls}`}>{entry.msg}</div>;
+}
 
 function StatusBadge({ status }: { status: string }) {
   const colors: Record<string, string> = {
