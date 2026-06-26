@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 // Automatická extrakcia detailov látok z webu dodávateľa pomocou Claude.
 // Claude načíta web (web_fetch), prejde produktové/látkové podstránky a vráti
@@ -159,4 +160,64 @@ export async function extractFabricsFromWebsite(opts: {
   }
 
   return { fabrics: [], notes: "Model nevrátil žiadne látky." };
+}
+
+// Mapuje extrahované látky na riadky do tabuľky `fabrics` (validuje materiály a jednotky).
+export function mapFabricsToRows(supplierId: string, fabrics: ExtractedFabric[]) {
+  return (Array.isArray(fabrics) ? fabrics : []).slice(0, 20).map((f) => ({
+    supplier_id: supplierId,
+    name: typeof f.name === "string" && f.name.trim() ? f.name.trim() : null,
+    composition:
+      typeof f.composition === "string" && f.composition.trim() ? f.composition.trim() : null,
+    weight_gsm: Number.isFinite(f.weight_gsm as number) ? f.weight_gsm : null,
+    width_cm: Number.isFinite(f.width_cm as number) ? f.width_cm : null,
+    moq: Number.isFinite(f.moq as number) ? f.moq : null,
+    moq_unit: f.moq_unit === "m" || f.moq_unit === "kg" ? f.moq_unit : null,
+    material_type: (Array.isArray(f.material_type) ? f.material_type : []).filter((m) =>
+      (MATERIAL_CODES as readonly string[]).includes(m)
+    ),
+    certifications: Array.isArray(f.certifications) ? f.certifications : [],
+    colors: Array.isArray(f.colors) ? f.colors : [],
+  }));
+}
+
+// Automatická extrakcia: spustí sa raz na dodávateľa (gated cez fabrics_fetched_at).
+// Volá sa na pozadí pri publikovaní a z cron backfillu. Tichý — chyby len loguje.
+export async function autoExtractFabrics(supplierId: string): Promise<void> {
+  const admin = createSupabaseAdminClient();
+
+  const { data: supplier } = await admin
+    .from("suppliers")
+    .select("id, name, website, fabrics_fetched_at")
+    .eq("id", supplierId)
+    .maybeSingle();
+
+  if (!supplier) return;
+  if (supplier.fabrics_fetched_at) return; // už sme to skúšali
+
+  const stamp = () =>
+    admin
+      .from("suppliers")
+      .update({ fabrics_fetched_at: new Date().toISOString() })
+      .eq("id", supplierId);
+
+  if (!supplier.website) {
+    await stamp();
+    return;
+  }
+
+  try {
+    const { fabrics } = await extractFabricsFromWebsite({
+      name: supplier.name,
+      website: supplier.website,
+    });
+    const rows = mapFabricsToRows(supplierId, fabrics);
+    if (rows.length > 0) {
+      await admin.from("fabrics").insert(rows);
+    }
+  } catch (e: any) {
+    console.error("autoExtractFabrics failed", supplierId, e?.message ?? e);
+  } finally {
+    await stamp();
+  }
 }

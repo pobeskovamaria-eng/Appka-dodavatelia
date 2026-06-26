@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/extract-fabrics",
+      "schedule": "0 * * * *"
+    }
+  ]
+}

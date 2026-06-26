@@ -2,9 +2,13 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { autoExtractFabrics } from "@/lib/extract-fabrics";
+import { scheduleBackground } from "@/lib/background";
 import { revalidatePath } from "next/cache";
 
 export const dynamic = "force-dynamic";
+// Publikovanie spúšťa AI extrakciu látok na pozadí — daj funkcii čas dobehnúť.
+export const maxDuration = 60;
 
 async function setStatus(formData: FormData) {
   "use server";
@@ -19,6 +23,12 @@ async function setStatus(formData: FormData) {
 
   const admin = createSupabaseAdminClient();
   await admin.from("suppliers").update({ status }).eq("id", id);
+
+  // Pri publikovaní automaticky dotiahni látky z webu (na pozadí, neblokuje odpoveď).
+  if (status === "published") {
+    scheduleBackground(autoExtractFabrics(id));
+  }
+
   revalidatePath("/admin");
   revalidatePath("/");
 }

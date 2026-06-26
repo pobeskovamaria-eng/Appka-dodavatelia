@@ -3,7 +3,8 @@ import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { extractFabricsFromWebsite, MATERIAL_CODES } from "@/lib/extract-fabrics";
+import { extractFabricsFromWebsite, autoExtractFabrics, mapFabricsToRows } from "@/lib/extract-fabrics";
+import { scheduleBackground } from "@/lib/background";
 
 export const dynamic = "force-dynamic";
 // Extrakcia cez web_fetch + Claude môže trvať dlhšie — daj serverless funkcii viac času.
@@ -114,6 +115,12 @@ async function setSupplierStatus(formData: FormData) {
 
   const admin = createSupabaseAdminClient();
   await admin.from("suppliers").update({ status }).eq("id", id);
+
+  // Pri publikovaní automaticky dotiahni látky z webu (na pozadí).
+  if (status === "published") {
+    scheduleBackground(autoExtractFabrics(id));
+  }
+
   revalidatePath(`/admin/supplier/${id}`);
   revalidatePath("/admin");
 }
@@ -144,22 +151,7 @@ async function autofillFabrics(formData: FormData) {
       website: supplier.website,
     });
 
-    const rows = fabrics.slice(0, 20).map((f) => ({
-      supplier_id: supplierId,
-      name: typeof f.name === "string" && f.name.trim() ? f.name.trim() : null,
-      composition:
-        typeof f.composition === "string" && f.composition.trim() ? f.composition.trim() : null,
-      weight_gsm: Number.isFinite(f.weight_gsm as number) ? f.weight_gsm : null,
-      width_cm: Number.isFinite(f.width_cm as number) ? f.width_cm : null,
-      moq: Number.isFinite(f.moq as number) ? f.moq : null,
-      moq_unit: f.moq_unit === "m" || f.moq_unit === "kg" ? f.moq_unit : null,
-      material_type: (Array.isArray(f.material_type) ? f.material_type : []).filter((m) =>
-        (MATERIAL_CODES as readonly string[]).includes(m)
-      ),
-      certifications: Array.isArray(f.certifications) ? f.certifications : [],
-      colors: Array.isArray(f.colors) ? f.colors : [],
-    }));
-
+    const rows = mapFabricsToRows(supplierId, fabrics);
     if (rows.length > 0) {
       const { error } = await admin.from("fabrics").insert(rows);
       if (error) throw error;
@@ -170,6 +162,12 @@ async function autofillFabrics(formData: FormData) {
     console.error("autofill fabrics failed", e?.message ?? e);
     outcome = "error";
   }
+
+  // Označ, že sme extrakciu skúšali, aby ju automatika nespúšťala znovu.
+  await admin
+    .from("suppliers")
+    .update({ fabrics_fetched_at: new Date().toISOString() })
+    .eq("id", supplierId);
 
   revalidatePath(`/admin/supplier/${supplierId}`);
   redirect(`/admin/supplier/${supplierId}?ai=${outcome}&n=${added}`);
@@ -242,7 +240,7 @@ export default async function AdminSupplierDetail({
         </div>
         {supplier.website && (
           <p className="mt-2 text-xs text-neutral-500">
-            AI načíta {supplier.website} a pokúsi sa vyplniť materiály, gramáž, MOQ a certifikáty. Vždy skontroluj výsledok.
+            Látky sa dotiahnu automaticky pri publikovaní. Tlačidlo slúži na manuálne (znovu)načítanie z {supplier.website}. Vždy skontroluj výsledok.
           </p>
         )}
       </header>
