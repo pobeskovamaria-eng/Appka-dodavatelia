@@ -1,9 +1,11 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
-// Automatická extrakcia detailov látok z webu dodávateľa pomocou Claude.
-// Claude načíta web (web_fetch), prejde produktové/látkové podstránky a vráti
-// štruktúrované dáta cez nástroj `save_fabrics`. Beží LEN server-side.
+// Rýchla extrakcia detailov látok z webu dodávateľa.
+// 1) appka si sama paralelne stiahne homepage + pár pravdepodobných podstránok,
+// 2) HTML zredukuje na text,
+// 3) Claude (claude-opus-4-8) spraví JEDNO volanie a vráti štruktúrované látky.
+// Celé sa zmestí do ~15–20 s (limit serverless funkcie je 60 s). Len server-side.
 
 export const MATERIAL_CODES = [
   "cotton",
@@ -35,38 +37,27 @@ export type ExtractResult = {
 const SAVE_TOOL = {
   name: "save_fabrics",
   description:
-    "Ulož extrahované druhy látok dodávateľa do katalógu. Zavolaj presne raz, keď máš dáta z webu pozbierané. Ak web nemá použiteľné informácie o látkach, zavolaj s prázdnym poľom fabrics.",
+    "Ulož extrahované druhy látok dodávateľa. Zavolaj VŽDY presne raz. Ak text neobsahuje použiteľné info o látkach, daj prázdne pole fabrics a vysvetlenie do notes.",
   input_schema: {
     type: "object",
     properties: {
       fabrics: {
         type: "array",
-        description: "Zoznam reprezentatívnych druhov látok (max ~10).",
+        description: "Reprezentatívne druhy látok (max ~10).",
         items: {
           type: "object",
           properties: {
-            name: {
-              type: ["string", "null"],
-              description: "Názov kolekcie alebo typu látky, napr. 'Hodvábny šifón'.",
-            },
+            name: { type: ["string", "null"] },
             material_type: {
               type: "array",
-              description: "Kódy materiálov. Použi LEN tieto kódy.",
               items: { type: "string", enum: MATERIAL_CODES },
             },
-            composition: {
-              type: ["string", "null"],
-              description: "Zloženie ako text, napr. '100% hodváb' alebo '95% bavlna, 5% elastan'.",
-            },
-            weight_gsm: { type: ["integer", "null"], description: "Gramáž v g/m²." },
-            width_cm: { type: ["integer", "null"], description: "Šírka v cm." },
-            moq: { type: ["integer", "null"], description: "Minimálny odber." },
+            composition: { type: ["string", "null"] },
+            weight_gsm: { type: ["integer", "null"] },
+            width_cm: { type: ["integer", "null"] },
+            moq: { type: ["integer", "null"] },
             moq_unit: { type: ["string", "null"], enum: ["m", "kg", null] },
-            certifications: {
-              type: "array",
-              description: "Certifikáty, napr. 'OEKO-TEX', 'GOTS', 'GRS'.",
-              items: { type: "string" },
-            },
+            certifications: { type: "array", items: { type: "string" } },
             colors: { type: "array", items: { type: "string" } },
           },
           required: [
@@ -83,86 +74,106 @@ const SAVE_TOOL = {
           additionalProperties: false,
         },
       },
-      notes: {
-        type: "string",
-        description: "Krátka poznámka pre admina (čo sa našlo / nenašlo).",
-      },
+      notes: { type: "string" },
     },
     required: ["fabrics", "notes"],
     additionalProperties: false,
   },
 };
 
-const SYSTEM = `Si asistent pre katalóg dodávateľov textilu. Tvojou úlohou je z webu dodávateľa zistiť, aké druhy látok ponúka, a vrátiť štruktúrované dáta.
+const SYSTEM = `Si asistent pre katalóg dodávateľov textilu. Dostaneš text stiahnutý z webu dodávateľa. Tvojou úlohou je z neho zistiť, aké druhy látok ponúka.
 
 Pravidlá:
-- Načítaj domovskú stránku cez web_fetch a podľa potreby prejdi na podstránky o produktoch / kolekciách / látkach (napr. "fabrics", "tessuti", "collezioni", "products", "prodotti").
 - Extrahuj REPREZENTATÍVNE druhy látok (max ~10), nie každý jednotlivý produkt.
-- material_type vyplň LEN kódmi: cotton, linen, wool, silk, viscose, polyester, elastane. Ak materiál nezodpovedá žiadnemu kódu, nechaj material_type prázdne, ale zloženie zachyť v composition.
-- Vypĺňaj len to, čo na webe naozaj nájdeš. Nehádaj gramáž, MOQ ani certifikáty — ak údaj nie je uvedený, daj null / prázdne pole.
-- Keď máš dáta pozbierané, zavolaj nástroj save_fabrics. Ak web neobsahuje informácie o látkach, zavolaj save_fabrics s prázdnym poľom fabrics a vysvetlením v notes.`;
+- material_type vyplň LEN kódmi: cotton, linen, wool, silk, viscose, polyester, elastane. Ak materiál nezodpovedá kódu, nechaj material_type prázdne, ale zloženie zachyť v composition.
+- Vypĺňaj len to, čo v texte naozaj je. Nehádaj gramáž, MOQ ani certifikáty — ak údaj nie je uvedený, daj null / prázdne pole.
+- Text môže byť v taliančine/angličtine — to je v poriadku.
+- Zavolaj nástroj save_fabrics. Ak text neobsahuje info o látkach (napr. len kontakt, prázdna stránka), zavolaj save_fabrics s prázdnym poľom fabrics a vysvetlením v notes.`;
+
+function htmlToText(html: string): string {
+  return html
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&[a-z]+;/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+async function fetchText(url: string, ms = 6000): Promise<string> {
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), ms);
+    const res = await fetch(url, {
+      signal: ctrl.signal,
+      redirect: "follow",
+      headers: { "user-agent": "Mozilla/5.0 (compatible; AppkaDodavatelia/1.0)" },
+      cache: "no-store",
+    });
+    clearTimeout(timer);
+    if (!res.ok) return "";
+    const html = await res.text();
+    return htmlToText(html);
+  } catch {
+    return "";
+  }
+}
+
+// Stiahne homepage + pár pravdepodobných podstránok paralelne, vráti spojený text.
+async function fetchSiteText(website: string): Promise<string> {
+  const base = `https://${website.replace(/\/+$/, "")}`;
+  const paths = ["", "/tessuti", "/fabrics", "/prodotti", "/collezioni", "/products"];
+  const texts = await Promise.all(paths.map((p) => fetchText(base + p)));
+  return texts
+    .map((t, i) => (t ? `[${paths[i] || "/"}]\n${t.slice(0, 7000)}` : ""))
+    .filter(Boolean)
+    .join("\n\n")
+    .slice(0, 28000);
+}
 
 export async function extractFabricsFromWebsite(opts: {
   name: string;
-  website: string; // čistá doména, napr. "vimercatitessuti.com"
+  website: string;
 }): Promise<ExtractResult> {
-  const client = new Anthropic();
-  const url = `https://${opts.website}`;
+  console.log("[extract] start", opts.website);
+  const siteText = await fetchSiteText(opts.website);
+  console.log("[extract] fetched text length", siteText.length);
 
-  const tools: any[] = [
-    {
-      type: "web_fetch_20260209",
-      name: "web_fetch",
-      max_uses: 6,
-      allowed_domains: [opts.website],
-      max_content_tokens: 60000,
-    },
-    SAVE_TOOL,
-  ];
-
-  const messages: any[] = [
-    {
-      role: "user",
-      content: `Dodávateľ: ${opts.name}\nWeb: ${url}\n\nNačítaj jeho web a zisti, aké druhy látok ponúka. Potom zavolaj save_fabrics.`,
-    },
-  ];
-
-  for (let iteration = 0; iteration < 8; iteration++) {
-    const response: any = await client.messages.create({
-      model: "claude-opus-4-8",
-      max_tokens: 8000,
-      output_config: { effort: "low" },
-      system: SYSTEM,
-      tools,
-      messages,
-    } as any);
-
-    const saveBlock = (response.content ?? []).find(
-      (b: any) => b.type === "tool_use" && b.name === "save_fabrics"
-    );
-    if (saveBlock) {
-      const input = saveBlock.input ?? {};
-      return {
-        fabrics: Array.isArray(input.fabrics) ? input.fabrics : [],
-        notes: typeof input.notes === "string" ? input.notes : "",
-      };
-    }
-
-    // pause_turn: server tool (web_fetch) ešte beží — pošli späť a pokračuj.
-    // tool_use bez save_fabrics: nemalo by nastať (web_fetch je server-side), ale pre istotu loopujeme.
-    if (response.stop_reason === "pause_turn" || response.stop_reason === "tool_use") {
-      messages.push({ role: "assistant", content: response.content });
-      continue;
-    }
-
-    // end_turn alebo iné — model nezavolal save_fabrics.
-    break;
+  if (!siteText) {
+    return { fabrics: [], notes: "Web sa nepodarilo stiahnuť (alebo je celý v JS/blokovaný)." };
   }
 
-  return { fabrics: [], notes: "Model nevrátil žiadne látky." };
+  const client = new Anthropic();
+  const response: any = await client.messages.create({
+    model: "claude-opus-4-8",
+    max_tokens: 4000,
+    output_config: { effort: "low" },
+    system: SYSTEM,
+    tools: [SAVE_TOOL],
+    tool_choice: { type: "tool", name: "save_fabrics" },
+    messages: [
+      {
+        role: "user",
+        content: `Dodávateľ: ${opts.name}\nWeb: https://${opts.website}\n\nText stiahnutý z webu:\n${siteText}\n\nExtrahuj druhy látok a zavolaj save_fabrics.`,
+      },
+    ],
+  } as any);
+
+  const block = (response.content ?? []).find(
+    (b: any) => b.type === "tool_use" && b.name === "save_fabrics"
+  );
+  const input = block?.input ?? {};
+  const fabrics = Array.isArray(input.fabrics) ? input.fabrics : [];
+  console.log("[extract] fabrics extracted", fabrics.length);
+  return {
+    fabrics,
+    notes: typeof input.notes === "string" ? input.notes : "",
+  };
 }
 
-// Mapuje extrahované látky na riadky do tabuľky `fabrics` (validuje materiály a jednotky).
+// Mapuje extrahované látky na riadky do tabuľky `fabrics`.
 export function mapFabricsToRows(supplierId: string, fabrics: ExtractedFabric[]) {
   return (Array.isArray(fabrics) ? fabrics : []).slice(0, 20).map((f) => ({
     supplier_id: supplierId,
@@ -181,11 +192,9 @@ export function mapFabricsToRows(supplierId: string, fabrics: ExtractedFabric[])
   }));
 }
 
-// Automatická extrakcia: spustí sa raz na dodávateľa (gated cez fabrics_fetched_at).
-// Volá sa na pozadí pri publikovaní a z cron backfillu. Tichý — chyby len loguje.
+// Automatická extrakcia: raz na dodávateľa (gated cez fabrics_fetched_at). Tichá.
 export async function autoExtractFabrics(supplierId: string): Promise<void> {
   const admin = createSupabaseAdminClient();
-
   const { data: supplier } = await admin
     .from("suppliers")
     .select("id, name, website, fabrics_fetched_at")
@@ -193,7 +202,7 @@ export async function autoExtractFabrics(supplierId: string): Promise<void> {
     .maybeSingle();
 
   if (!supplier) return;
-  if (supplier.fabrics_fetched_at) return; // už sme to skúšali
+  if (supplier.fabrics_fetched_at) return;
 
   const stamp = () =>
     admin

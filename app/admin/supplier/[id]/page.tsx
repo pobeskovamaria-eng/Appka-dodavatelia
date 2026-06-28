@@ -5,6 +5,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { extractFabricsFromWebsite, autoExtractFabrics, mapFabricsToRows } from "@/lib/extract-fabrics";
 import { scheduleBackground } from "@/lib/background";
+import { AutofillButton } from "./AutofillButton";
 
 export const dynamic = "force-dynamic";
 // Extrakcia cez web_fetch + Claude môže trvať dlhšie — daj serverless funkcii viac času.
@@ -227,9 +228,7 @@ export default async function AdminSupplierDetail({
           {supplier.website && (
             <form action={autofillFabrics}>
               <input type="hidden" name="supplier_id" value={supplier.id} />
-              <button className="rounded bg-indigo-600 px-3 py-1 text-xs text-white">
-                Doplniť látky z webu (AI)
-              </button>
+              <AutofillButton />
             </form>
           )}
           {supplier.source_url && (
