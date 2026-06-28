@@ -33,18 +33,30 @@ async function setStatus(formData: FormData) {
   revalidatePath("/");
 }
 
-export default async function AdminPage() {
+export default async function AdminPage({
+  searchParams,
+}: {
+  searchParams: { q?: string; onlyWeb?: string };
+}) {
   const supabase = createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/admin/login");
 
+  const q = (searchParams.q ?? "").trim();
+  const onlyWeb = searchParams.onlyWeb === "1";
+
   // Service-role výber: na admin stránke chceme vidieť aj 'new' a 'rejected'.
   const admin = createSupabaseAdminClient();
-  const { data: pending } = await admin
+  let query = admin
     .from("suppliers")
     .select("id, name, website, country, city, source, source_url, status, created_at, raw")
     .order("created_at", { ascending: false })
     .limit(200);
+
+  if (q) query = query.ilike("name", `%${q}%`);
+  if (onlyWeb) query = query.not("website", "is", null);
+
+  const { data: pending } = await query;
 
   const groups = {
     new: (pending ?? []).filter((s) => s.status === "new"),
@@ -58,6 +70,31 @@ export default async function AdminPage() {
         <h1 className="text-2xl font-semibold">Review fronta</h1>
         <span className="text-sm text-neutral-600">{user.email}</span>
       </header>
+
+      <form method="get" className="flex flex-wrap items-center gap-2 rounded border bg-white p-3">
+        <input
+          name="q"
+          defaultValue={q}
+          placeholder="Hľadať dodávateľa podľa názvu…"
+          className="min-w-[220px] flex-1 rounded border px-3 py-2 text-sm"
+        />
+        <label className="flex items-center gap-1 text-sm text-neutral-700">
+          <input type="checkbox" name="onlyWeb" value="1" defaultChecked={onlyWeb} />
+          len s webom
+        </label>
+        <button type="submit" className="rounded bg-neutral-900 px-4 py-2 text-sm text-white">
+          Hľadať
+        </button>
+        {(q || onlyWeb) && (
+          <Link href="/admin" className="rounded border px-3 py-2 text-sm hover:bg-neutral-50">
+            Zrušiť
+          </Link>
+        )}
+      </form>
+
+      {(q || onlyWeb) && (pending ?? []).length === 0 && (
+        <p className="text-sm text-neutral-600">Žiadny dodávateľ nevyhovuje hľadaniu.</p>
+      )}
 
       <Section title={`Na schválenie (${groups.new.length})`} rows={groups.new} action={setStatus} />
       <Section title={`Publikované (${groups.published.length})`} rows={groups.published} action={setStatus} />
