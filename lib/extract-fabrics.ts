@@ -85,10 +85,21 @@ const SYSTEM = `Si asistent pre katalóg dodávateľov textilu. Dostaneš text s
 
 Pravidlá:
 - Extrahuj REPREZENTATÍVNE druhy látok (max ~10), nie každý jednotlivý produkt.
-- material_type vyplň LEN kódmi: cotton, linen, wool, silk, viscose, polyester, elastane. Ak materiál nezodpovedá kódu, nechaj material_type prázdne, ale zloženie zachyť v composition.
-- Vypĺňaj len to, čo v texte naozaj je. Nehádaj gramáž, MOQ ani certifikáty — ak údaj nie je uvedený, daj null / prázdne pole.
+- composition (zloženie) vypĺňaj VŽDY, keď je v texte uvedené percentuálne/slovné zloženie — je to najdôležitejšie pole. Zachovaj originál (napr. "100% seta", "95% cotone 5% elastan").
+- material_type ODVOĎ zo zloženia. Použi LEN tieto kódy a mapuj talianske/anglické názvy vlákien:
+    cotone / cotton → cotton
+    lino / linen → linen
+    lana / wool / cashmere / mohair → wool
+    seta / silk → silk
+    viscosa / viscose / rayon / modal / cupro / lyocell / tencel → viscose
+    poliestere / polyester → polyester
+    elastan / elastane / spandex / lycra → elastane
+  Ak je v zložení viac vlákien, daj do material_type všetky zodpovedajúce kódy.
+- POZOR: raso/satin/satén, velluto, jersey, popeline, twill sú TYPY TKANIA, nie vlákna — z nich sám materiál neurčuj. Vlákno ber len zo zloženia.
+- Ak vlákno nezodpovedá žiadnemu kódu (napr. nylon/poliammide, akryl, canapa) alebo zloženie nie je uvedené, nechaj material_type prázdne, ale composition aj tak zachyť, ak je.
+- Nehádaj gramáž, MOQ ani certifikáty — ak údaj nie je uvedený, daj null / prázdne pole.
 - Text môže byť v taliančine/angličtine — to je v poriadku.
-- Zavolaj nástroj save_fabrics. Ak text neobsahuje info o látkach (napr. len kontakt, prázdna stránka), zavolaj save_fabrics s prázdnym poľom fabrics a vysvetlením v notes.`;
+- Zavolaj nástroj save_fabrics. Ak text neobsahuje info o látkach (napr. len kontakt), zavolaj save_fabrics s prázdnym poľom fabrics a vysvetlením v notes.`;
 
 function htmlToText(html: string): string {
   return html
