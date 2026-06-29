@@ -102,7 +102,7 @@ function htmlToText(html: string): string {
     .trim();
 }
 
-async function fetchText(url: string, ms = 6000): Promise<string> {
+async function fetchHtml(url: string, ms = 6000): Promise<string> {
   try {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), ms);
@@ -114,23 +114,82 @@ async function fetchText(url: string, ms = 6000): Promise<string> {
     });
     clearTimeout(timer);
     if (!res.ok) return "";
-    const html = await res.text();
-    return htmlToText(html);
+    return await res.text();
   } catch {
     return "";
   }
 }
 
-// Stiahne homepage + pár pravdepodobných podstránok paralelne, vráti spojený text.
+// Slová, ktoré naznačujú produktovú/látkovú stránku.
+const PRODUCT_HINTS = [
+  "tessut", "raso", "cotone", "lino", "seta", "lana", "viscos", "satin", "saten",
+  "velluto", "jersey", "popeline", "fabric", "cloth", "tela", "panno", "mussola",
+  "crepe", "chiffon", "organza", "taffeta", "gabardine", "denim", "flanella", "tweed",
+];
+
+function extractSameHostLinks(html: string, base: string): string[] {
+  const out = new Set<string>();
+  const host = new URL(base).host;
+  const re = /<a\s[^>]*href=["']([^"'#]+)["']/gi;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(html))) {
+    try {
+      const u = new URL(m[1], base);
+      if (u.host !== host) continue;
+      out.add(u.origin + u.pathname);
+    } catch {
+      /* ignore */
+    }
+  }
+  return [...out];
+}
+
+function scoreProductLink(url: string): number {
+  const l = url.toLowerCase();
+  let score = 0;
+  for (const h of PRODUCT_HINTS) if (l.includes(h)) score += 2;
+  // hlbšia cesta = pravdepodobnejšie detail produktu (nie len kategória)
+  const segs = new URL(url).pathname.split("/").filter(Boolean).length;
+  score += Math.min(segs, 4);
+  return score;
+}
+
+// 1) stiahne homepage + prehľadové stránky, 2) nájde produktové odkazy,
+// 3) stiahne najsľubnejšie produktové detaily — kde býva zloženie, gramáž atď.
 async function fetchSiteText(website: string): Promise<string> {
   const base = `https://${website.replace(/\/+$/, "")}`;
-  const paths = ["", "/tessuti", "/fabrics", "/prodotti", "/collezioni", "/products"];
-  const texts = await Promise.all(paths.map((p) => fetchText(base + p)));
-  return texts
-    .map((t, i) => (t ? `[${paths[i] || "/"}]\n${t.slice(0, 7000)}` : ""))
+  const seeds = ["", "/tessuti", "/prodotti", "/shop", "/catalogo", "/collezioni"];
+
+  const seedHtml = await Promise.all(seeds.map((p) => fetchHtml(base + p)));
+  const seedText = seedHtml
+    .map((h) => htmlToText(h))
     .filter(Boolean)
-    .join("\n\n")
-    .slice(0, 28000);
+    .join("\n")
+    .slice(0, 14000);
+
+  const seedSet = new Set(seeds.map((p) => (base + p).replace(/\/+$/, "")));
+  const links = new Set<string>();
+  for (const html of seedHtml) for (const l of extractSameHostLinks(html, base)) links.add(l);
+
+  const ranked = [...links]
+    .filter((l) => !seedSet.has(l.replace(/\/+$/, "")))
+    .map((l) => [l, scoreProductLink(l)] as const)
+    .filter(([, s]) => s > 1)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10)
+    .map(([l]) => l);
+
+  const productHtml = await Promise.all(ranked.map((l) => fetchHtml(l)));
+  const productBlock = ranked
+    .map((l, i) => {
+      const t = htmlToText(productHtml[i]);
+      return t ? `[PRODUKT ${l}]\n${t.slice(0, 4500)}` : "";
+    })
+    .filter(Boolean)
+    .join("\n\n");
+
+  console.log("[extract] product pages fetched", ranked.length);
+  return `${seedText}\n\n${productBlock}`.slice(0, 45000);
 }
 
 export async function extractFabricsFromWebsite(opts: {
