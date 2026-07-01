@@ -203,11 +203,14 @@ async function fetchSiteText(website: string): Promise<string> {
   return `${seedText}\n\n${productBlock}`.slice(0, 45000);
 }
 
-export async function extractFabricsFromWebsite(opts: {
-  name: string;
-  website: string;
-}): Promise<ExtractResult> {
-  console.log("[extract] start", opts.website);
+export async function extractFabricsFromWebsite(
+  opts: {
+    name: string;
+    website: string;
+  },
+  model: string = "claude-opus-4-8"
+): Promise<ExtractResult> {
+  console.log("[extract] start", opts.website, "model", model);
   const siteText = await fetchSiteText(opts.website);
   console.log("[extract] fetched text length", siteText.length);
 
@@ -216,10 +219,9 @@ export async function extractFabricsFromWebsite(opts: {
   }
 
   const client = new Anthropic();
-  const response: any = await client.messages.create({
-    model: "claude-opus-4-8",
+  const params: any = {
+    model,
     max_tokens: 4000,
-    output_config: { effort: "low" },
     system: SYSTEM,
     tools: [SAVE_TOOL],
     tool_choice: { type: "tool", name: "save_fabrics" },
@@ -229,7 +231,12 @@ export async function extractFabricsFromWebsite(opts: {
         content: `Dodávateľ: ${opts.name}\nWeb: https://${opts.website}\n\nText stiahnutý z webu:\n${siteText}\n\nExtrahuj druhy látok a zavolaj save_fabrics.`,
       },
     ],
-  } as any);
+  };
+  // effort podporujú len Opus/Sonnet 4.6+, nie Haiku — pridaj len pre Opus.
+  if (model.startsWith("claude-opus")) {
+    params.output_config = { effort: "low" };
+  }
+  const response: any = await client.messages.create(params);
 
   const block = (response.content ?? []).find(
     (b: any) => b.type === "tool_use" && b.name === "save_fabrics"
@@ -263,7 +270,10 @@ export function mapFabricsToRows(supplierId: string, fabrics: ExtractedFabric[])
 }
 
 // Automatická extrakcia: raz na dodávateľa (gated cez fabrics_fetched_at). Tichá.
-export async function autoExtractFabrics(supplierId: string): Promise<void> {
+export async function autoExtractFabrics(
+  supplierId: string,
+  model: string = "claude-opus-4-8"
+): Promise<void> {
   const admin = createSupabaseAdminClient();
   const { data: supplier } = await admin
     .from("suppliers")
@@ -286,10 +296,13 @@ export async function autoExtractFabrics(supplierId: string): Promise<void> {
   }
 
   try {
-    const { fabrics } = await extractFabricsFromWebsite({
-      name: supplier.name,
-      website: supplier.website,
-    });
+    const { fabrics } = await extractFabricsFromWebsite(
+      {
+        name: supplier.name,
+        website: supplier.website,
+      },
+      model
+    );
     const rows = mapFabricsToRows(supplierId, fabrics);
     if (rows.length > 0) {
       await admin.from("fabrics").insert(rows);

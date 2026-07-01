@@ -42,15 +42,23 @@ async function bulkExtract() {
   if (!user) redirect("/admin/login");
 
   const admin = createSupabaseAdminClient();
-  const { data: batch } = await admin
-    .from("suppliers")
-    .select("id")
-    .not("website", "is", null)
-    .is("fabrics_fetched_at", null)
-    .limit(3);
 
-  const ids = (batch ?? []).map((s) => s.id);
-  await Promise.all(ids.map((id) => autoExtractFabrics(id)));
+  // Hromadne cez Haiku (lacný + rýchly). V jednom kliku spracuj viac dávok,
+  // kým sme v bezpečnom čase pod 60s limitom funkcie.
+  const start = Date.now();
+  let processed = 0;
+  while (Date.now() - start < 45000) {
+    const { data: batch } = await admin
+      .from("suppliers")
+      .select("id")
+      .not("website", "is", null)
+      .is("fabrics_fetched_at", null)
+      .limit(5);
+    const ids = (batch ?? []).map((s) => s.id);
+    if (ids.length === 0) break;
+    await Promise.all(ids.map((id) => autoExtractFabrics(id, "claude-haiku-4-5")));
+    processed += ids.length;
+  }
 
   const { count } = await admin
     .from("suppliers")
@@ -60,7 +68,7 @@ async function bulkExtract() {
 
   revalidatePath("/admin");
   revalidatePath("/");
-  redirect(`/admin?bulk=${ids.length}&left=${count ?? 0}`);
+  redirect(`/admin?bulk=${processed}&left=${count ?? 0}`);
 }
 
 export default async function AdminPage({
