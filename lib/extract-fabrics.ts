@@ -225,6 +225,19 @@ async function fetchSiteText(website: string): Promise<string> {
   return `${seedText}\n\n${productBlock}`.slice(0, 45000);
 }
 
+// Rýchle dotiahnutie kontaktného emailu z webu (bez LLM): homepage + kontaktné
+// stránky + mailto odkazy. Vracia email alebo null.
+export async function fetchContactEmail(website: string): Promise<string | null> {
+  const base = `https://${website.replace(/\/+$/, "")}`;
+  const paths = ["", "/contatti", "/contact", "/contacts", "/kontakt"];
+  const htmls = await Promise.all(paths.map((p) => fetchHtml(base + p, 5000)));
+  const mailtos = (htmls.join(" ").match(/mailto:([^"'?>\s]+)/gi) ?? []).map((m) =>
+    m.replace(/mailto:/i, "")
+  );
+  const text = htmls.map((h) => htmlToText(h)).join(" ") + " " + mailtos.join(" ");
+  return extractEmail(text, website);
+}
+
 export async function extractFabricsFromWebsite(
   opts: {
     name: string;

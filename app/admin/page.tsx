@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { autoExtractFabrics } from "@/lib/extract-fabrics";
+import { autoExtractFabrics, fetchContactEmail } from "@/lib/extract-fabrics";
 import { scheduleBackground } from "@/lib/background";
 import { revalidatePath } from "next/cache";
 
@@ -71,10 +71,56 @@ async function bulkExtract() {
   redirect(`/admin?bulk=${processed}&left=${count ?? 0}`);
 }
 
+// Rýchlo (bez LLM) dotiahne kontaktný email z webu pre dodávateľov, ktorí ho nemajú.
+// Kde sa nič nenájde, uloží "" aby sa dodávateľ znova nekontroloval.
+async function backfillEmails() {
+  "use server";
+  const supabase = createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/admin/login");
+
+  const admin = createSupabaseAdminClient();
+  const start = Date.now();
+  let found = 0;
+  let checked = 0;
+
+  while (Date.now() - start < 45000) {
+    const { data: batch } = await admin
+      .from("suppliers")
+      .select("id, website")
+      .not("website", "is", null)
+      .is("email", null)
+      .limit(10);
+    const list = batch ?? [];
+    if (list.length === 0) break;
+
+    await Promise.all(
+      list.map(async (s: any) => {
+        const email = await fetchContactEmail(s.website);
+        await admin.from("suppliers").update({ email: email ?? "" }).eq("id", s.id);
+        if (email) found++;
+      })
+    );
+    checked += list.length;
+  }
+
+  revalidatePath("/admin");
+  redirect(`/admin?emails=${found}&checked=${checked}`);
+}
+
 export default async function AdminPage({
   searchParams,
 }: {
-  searchParams: { q?: string; onlyWeb?: string; material?: string; cert?: string; bulk?: string; left?: string };
+  searchParams: {
+    q?: string;
+    onlyWeb?: string;
+    material?: string;
+    cert?: string;
+    bulk?: string;
+    left?: string;
+    emails?: string;
+    checked?: string;
+  };
 }) {
   const supabase = createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -138,6 +184,13 @@ export default async function AdminPage({
         </div>
       )}
 
+      {searchParams.emails !== undefined && (
+        <div className="rounded border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
+          Preverených {searchParams.checked ?? "?"} dodávateľov, nájdených {searchParams.emails} nových emailov.
+          Klikni znova, ak chceš preveriť ďalších.
+        </div>
+      )}
+
       <form method="get" className="flex flex-wrap items-center gap-2 rounded border bg-white p-3">
         <input
           name="q"
@@ -181,6 +234,11 @@ export default async function AdminPage({
         <form action={bulkExtract}>
           <button className="rounded bg-indigo-600 px-3 py-1 text-xs text-white">
             Dotiahnuť ďalšiu dávku (~15, trvá ~45 s)
+          </button>
+        </form>
+        <form action={backfillEmails}>
+          <button className="rounded bg-teal-600 px-3 py-1 text-xs text-white">
+            Dotiahnuť chýbajúce emaily (zadarmo, ~45 s)
           </button>
         </form>
       </div>
