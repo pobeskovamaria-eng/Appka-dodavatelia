@@ -180,7 +180,7 @@ export default async function AdminPage({
         </span>
         <form action={bulkExtract}>
           <button className="rounded bg-indigo-600 px-3 py-1 text-xs text-white">
-            Dotiahnuť ďalšiu dávku (3)
+            Dotiahnuť ďalšiu dávku (~15, trvá ~45 s)
           </button>
         </form>
       </div>
