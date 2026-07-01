@@ -126,6 +126,21 @@ async function setSupplierStatus(formData: FormData) {
   revalidatePath("/admin");
 }
 
+// Prepne príznak "top dodávateľ".
+async function toggleTop(formData: FormData) {
+  "use server";
+  await requireAdmin();
+  const id = String(formData.get("id"));
+  const next = String(formData.get("next")) === "1";
+  if (!id) return;
+
+  const admin = createSupabaseAdminClient();
+  await admin.from("suppliers").update({ is_top: next }).eq("id", id);
+
+  revalidatePath(`/admin/supplier/${id}`);
+  revalidatePath("/admin");
+}
+
 // Automaticky doplní látky z webu dodávateľa cez Claude (web_fetch + extrakcia).
 async function autofillFabrics(formData: FormData) {
   "use server";
@@ -146,8 +161,9 @@ async function autofillFabrics(formData: FormData) {
 
   let outcome = "ok";
   let added = 0;
+  const patch: any = { fabrics_fetched_at: new Date().toISOString() };
   try {
-    const { fabrics } = await extractFabricsFromWebsite({
+    const { fabrics, sustainability, siteCertifications } = await extractFabricsFromWebsite({
       name: supplier.name,
       website: supplier.website,
     });
@@ -159,16 +175,17 @@ async function autofillFabrics(formData: FormData) {
     }
     added = rows.length;
     if (added === 0) outcome = "empty";
+    // Zapíš aj signály z webu (sustainability + certifikáty).
+    patch.sustainability = sustainability;
+    patch.site_certifications = siteCertifications;
+    patch.signals_scanned_at = new Date().toISOString();
   } catch (e: any) {
     console.error("autofill fabrics failed", e?.message ?? e);
     outcome = "error";
   }
 
-  // Označ, že sme extrakciu skúšali, aby ju automatika nespúšťala znovu.
-  await admin
-    .from("suppliers")
-    .update({ fabrics_fetched_at: new Date().toISOString() })
-    .eq("id", supplierId);
+  // Označ, že sme extrakciu skúšali, aby ju automatika nespúšťala znovu (+ signály).
+  await admin.from("suppliers").update(patch).eq("id", supplierId);
 
   revalidatePath(`/admin/supplier/${supplierId}`);
   redirect(`/admin/supplier/${supplierId}?ai=${outcome}&n=${added}`);
@@ -206,11 +223,30 @@ export default async function AdminSupplierDetail({
       <AiBanner ai={searchParams.ai} n={searchParams.n} />
 
       <header className="rounded border bg-white p-4">
-        <h1 className="text-2xl font-semibold">{supplier.name}</h1>
+        <h1 className="text-2xl font-semibold">
+          {supplier.name}
+          {supplier.is_top && (
+            <span className="ml-2 inline-block rounded bg-amber-400 px-2 py-0.5 align-middle text-xs font-semibold text-amber-950">
+              ★ TOP
+            </span>
+          )}
+        </h1>
         <p className="mt-1 text-sm text-neutral-600">
           {[supplier.city, supplier.country, supplier.website].filter(Boolean).join(" · ")}
         </p>
+        <SupplierSignals supplier={supplier} />
         <div className="mt-3 flex flex-wrap gap-2">
+          <form action={toggleTop}>
+            <input type="hidden" name="id" value={supplier.id} />
+            <input type="hidden" name="next" value={supplier.is_top ? "0" : "1"} />
+            <button
+              className={`rounded px-3 py-1 text-xs ${
+                supplier.is_top ? "bg-amber-400 text-amber-950" : "border hover:bg-neutral-50"
+              }`}
+            >
+              {supplier.is_top ? "★ TOP (zrušiť)" : "Označiť ako TOP"}
+            </button>
+          </form>
           {supplier.status !== "published" && (
             <form action={setSupplierStatus}>
               <input type="hidden" name="id" value={supplier.id} />
@@ -305,6 +341,35 @@ function AiBanner({ ai, n }: { ai?: string; n?: string }) {
   const entry = map[ai];
   if (!entry) return null;
   return <div className={`rounded border p-3 text-sm ${entry.cls}`}>{entry.msg}</div>;
+}
+
+// Google hodnotenie + signály z webu (sustainability, certifikáty) pre detail.
+function SupplierSignals({ supplier }: { supplier: any }) {
+  const score = Number(supplier.raw?.totalScore);
+  const reviews = Number(supplier.raw?.reviewsCount);
+  const certs: string[] = Array.isArray(supplier.site_certifications) ? supplier.site_certifications : [];
+  const hasScore = Number.isFinite(score) && score > 0;
+  if (!hasScore && !supplier.sustainability && certs.length === 0) return null;
+  return (
+    <div className="mt-2 flex flex-wrap gap-1">
+      {hasScore && (
+        <span className="rounded bg-yellow-100 px-1.5 py-0.5 text-[11px] text-yellow-800">
+          ★ {score.toFixed(1)}
+          {Number.isFinite(reviews) && reviews > 0 ? ` (${reviews} hodnotení)` : ""}
+        </span>
+      )}
+      {supplier.sustainability && (
+        <span className="rounded bg-green-100 px-1.5 py-0.5 text-[11px] text-green-800">
+          ♻ udržateľnosť na webe
+        </span>
+      )}
+      {certs.map((c) => (
+        <span key={c} className="rounded bg-emerald-100 px-1.5 py-0.5 text-[11px] text-emerald-800">
+          {c} (web)
+        </span>
+      ))}
+    </div>
+  );
 }
 
 function StatusBadge({ status }: { status: string }) {

@@ -33,7 +33,41 @@ export type ExtractResult = {
   fabrics: ExtractedFabric[];
   notes: string;
   email: string | null;
+  sustainability: boolean;
+  siteCertifications: string[];
 };
+
+// Certifikáty, ktoré vieme rozpoznať priamo v texte webu (site-level).
+const CERT_PATTERNS: [string, RegExp][] = [
+  ["OEKO-TEX", /oeko[\s-]?tex/i],
+  ["GOTS", /\bgots\b|global organic textile/i],
+  ["GRS", /\bgrs\b|global recycled standard/i],
+  ["RWS", /\brws\b|responsible wool/i],
+  ["BCI", /\bbci\b|better cotton/i],
+  ["FSC", /\bfsc\b|forest stewardship/i],
+  ["Bluesign", /bluesign/i],
+  ["REACH", /\breach\b/i],
+  ["ISO 9001", /iso\s?9001/i],
+  ["ISO 14001", /iso\s?14001/i],
+];
+
+// Slová naznačujúce, že web spomína udržateľnosť (SK/EN/IT).
+const SUSTAINABILITY_HINTS = [
+  "sustainab", "sostenibil", "eco-friendly", "ecofriendly", "eco friendly",
+  "organic", "biologic", "recycl", "riciclat", "responsible", "responsabil",
+  "circular", "circolar", "carbon neutral", "carbon-neutral", "ethical", "etico",
+  "udržateľn", "eko-", "environment", "ambientale",
+];
+
+// Zistí zo stiahnutého textu, či web spomína udržateľnosť a aké certifikáty uvádza.
+// Čistá regex analýza (bez LLM) — zadarmo.
+export function detectSignals(text: string): { sustainability: boolean; certifications: string[] } {
+  const lower = text.toLowerCase();
+  const certifications = CERT_PATTERNS.filter(([, re]) => re.test(text)).map(([name]) => name);
+  const sustainability =
+    certifications.length > 0 || SUSTAINABILITY_HINTS.some((h) => lower.includes(h));
+  return { sustainability, certifications };
+}
 
 // Nájde v texte webu pravdepodobný kontaktný email (uprednostní role adresy na doméne).
 function extractEmail(text: string, website: string): string | null {
@@ -238,6 +272,21 @@ export async function fetchContactEmail(website: string): Promise<string | null>
   return extractEmail(text, website);
 }
 
+// Rýchly sken sustainability + certifikátov z webu (bez LLM): homepage + typické
+// stránky o firme/udržateľnosti/certifikáciách. Vracia signály pre backfill.
+export async function scanSiteSignals(
+  website: string
+): Promise<{ sustainability: boolean; certifications: string[] }> {
+  const base = `https://${website.replace(/\/+$/, "")}`;
+  const paths = [
+    "", "/sostenibilita", "/sustainability", "/about", "/chi-siamo",
+    "/certificazioni", "/certifications", "/certificati", "/qualita", "/azienda",
+  ];
+  const htmls = await Promise.all(paths.map((p) => fetchHtml(base + p, 5000)));
+  const text = htmls.map((h) => htmlToText(h)).join(" ");
+  return detectSignals(text);
+}
+
 export async function extractFabricsFromWebsite(
   opts: {
     name: string;
@@ -250,10 +299,17 @@ export async function extractFabricsFromWebsite(
   console.log("[extract] fetched text length", siteText.length);
 
   if (!siteText) {
-    return { fabrics: [], notes: "Web sa nepodarilo stiahnuť (alebo je celý v JS/blokovaný).", email: null };
+    return {
+      fabrics: [],
+      notes: "Web sa nepodarilo stiahnuť (alebo je celý v JS/blokovaný).",
+      email: null,
+      sustainability: false,
+      siteCertifications: [],
+    };
   }
 
   const email = extractEmail(siteText, opts.website);
+  const signals = detectSignals(siteText);
 
   const client = new Anthropic();
   const params: any = {
@@ -285,6 +341,8 @@ export async function extractFabricsFromWebsite(
     fabrics,
     notes: typeof input.notes === "string" ? input.notes : "",
     email,
+    sustainability: signals.sustainability,
+    siteCertifications: signals.certifications,
   };
 }
 
@@ -334,7 +392,7 @@ export async function autoExtractFabrics(
   }
 
   try {
-    const { fabrics, email } = await extractFabricsFromWebsite(
+    const { fabrics, email, sustainability, siteCertifications } = await extractFabricsFromWebsite(
       {
         name: supplier.name,
         website: supplier.website,
@@ -345,10 +403,14 @@ export async function autoExtractFabrics(
     if (rows.length > 0) {
       await admin.from("fabrics").insert(rows);
     }
-    // Doplň kontaktný email z webu, ak dodávateľ ešte žiadny nemá.
-    if (email && !supplier.email) {
-      await admin.from("suppliers").update({ email }).eq("id", supplierId);
-    }
+    // Zapíš signály (sustainability/certifikáty z webu) + prípadne chýbajúci email.
+    const patch: any = {
+      sustainability,
+      site_certifications: siteCertifications,
+      signals_scanned_at: new Date().toISOString(),
+    };
+    if (email && !supplier.email) patch.email = email;
+    await admin.from("suppliers").update(patch).eq("id", supplierId);
   } catch (e: any) {
     console.error("autoExtractFabrics failed", supplierId, e?.message ?? e);
   } finally {

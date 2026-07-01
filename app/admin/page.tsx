@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { autoExtractFabrics, fetchContactEmail } from "@/lib/extract-fabrics";
+import { autoExtractFabrics, fetchContactEmail, scanSiteSignals } from "@/lib/extract-fabrics";
 import { scheduleBackground } from "@/lib/background";
 import { revalidatePath } from "next/cache";
 
@@ -108,6 +108,73 @@ async function backfillEmails() {
   redirect(`/admin?emails=${found}&checked=${checked}`);
 }
 
+// Prepne príznak "top dodávateľ" (spĺňa všetky naše požiadavky).
+async function toggleTop(formData: FormData) {
+  "use server";
+  const id = String(formData.get("id"));
+  const next = String(formData.get("next")) === "1";
+  if (!id) return;
+
+  const supabase = createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/admin/login");
+
+  const admin = createSupabaseAdminClient();
+  await admin.from("suppliers").update({ is_top: next }).eq("id", id);
+
+  revalidatePath("/admin");
+  revalidatePath("/");
+}
+
+// Rýchlo (bez LLM) doskenuje sustainability + certifikácie z webu pre dodávateľov,
+// ktorých sme ešte neskenovali. Umožní filtrovať aj tých už spracovaných.
+async function backfillSignals() {
+  "use server";
+  const supabase = createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/admin/login");
+
+  const admin = createSupabaseAdminClient();
+  const start = Date.now();
+  let scanned = 0;
+
+  while (Date.now() - start < 45000) {
+    const { data: batch } = await admin
+      .from("suppliers")
+      .select("id, website")
+      .not("website", "is", null)
+      .is("signals_scanned_at", null)
+      .limit(8);
+    const list = batch ?? [];
+    if (list.length === 0) break;
+
+    await Promise.all(
+      list.map(async (s: any) => {
+        const sig = await scanSiteSignals(s.website);
+        await admin
+          .from("suppliers")
+          .update({
+            sustainability: sig.sustainability,
+            site_certifications: sig.certifications,
+            signals_scanned_at: new Date().toISOString(),
+          })
+          .eq("id", s.id);
+      })
+    );
+    scanned += list.length;
+  }
+
+  const { count } = await admin
+    .from("suppliers")
+    .select("id", { count: "exact", head: true })
+    .not("website", "is", null)
+    .is("signals_scanned_at", null);
+
+  revalidatePath("/admin");
+  revalidatePath("/");
+  redirect(`/admin?signals=${scanned}&signalsLeft=${count ?? 0}`);
+}
+
 export default async function AdminPage({
   searchParams,
 }: {
@@ -116,10 +183,16 @@ export default async function AdminPage({
     onlyWeb?: string;
     material?: string;
     cert?: string;
+    siteCert?: string;
+    sustainability?: string;
+    minRating?: string;
+    top?: string;
     bulk?: string;
     left?: string;
     emails?: string;
     checked?: string;
+    signals?: string;
+    signalsLeft?: string;
   };
 }) {
   const supabase = createSupabaseServerClient();
@@ -130,6 +203,10 @@ export default async function AdminPage({
   const onlyWeb = searchParams.onlyWeb === "1";
   const material = (searchParams.material ?? "").trim();
   const cert = (searchParams.cert ?? "").trim();
+  const siteCert = (searchParams.siteCert ?? "").trim();
+  const sustainabilityOnly = searchParams.sustainability === "1";
+  const minRating = Number(searchParams.minRating ?? "") || 0;
+  const topOnly = searchParams.top === "1";
 
   // Service-role výber: na admin stránke chceme vidieť aj 'new' a 'rejected'.
   // Naťahujeme aj látky, aby sme vedeli filtrovať podľa materiálu/certifikátu (v JS).
@@ -137,13 +214,17 @@ export default async function AdminPage({
   let query = admin
     .from("suppliers")
     .select(
-      "id, name, website, email, phone, country, city, source, source_url, status, created_at, raw, fabrics(material_type, certifications)"
+      "id, name, website, email, phone, country, city, source, source_url, status, created_at, raw, is_top, sustainability, site_certifications, fabrics(material_type, certifications)"
     )
     .order("created_at", { ascending: false })
     .limit(300);
 
   if (q) query = query.ilike("name", `%${q}%`);
-  if (onlyWeb || material || cert) query = query.not("website", "is", null);
+  if (onlyWeb || material || cert || siteCert || sustainabilityOnly) {
+    query = query.not("website", "is", null);
+  }
+  if (topOnly) query = query.eq("is_top", true);
+  if (sustainabilityOnly) query = query.eq("sustainability", true);
 
   const { data: rawRows } = await query;
 
@@ -159,6 +240,14 @@ export default async function AdminPage({
       (s.fabrics ?? []).some((f: any) => (f.certifications ?? []).includes(cert))
     );
   }
+  // Certifikát nájdený priamo na webe (site-level).
+  if (siteCert) {
+    rows = rows.filter((s: any) => (s.site_certifications ?? []).includes(siteCert));
+  }
+  // Minimálne Google hodnotenie — číta sa z raw.totalScore (z Apify).
+  if (minRating > 0) {
+    rows = rows.filter((s: any) => Number(s.raw?.totalScore) >= minRating);
+  }
 
   const groups = {
     new: rows.filter((s: any) => s.status === "new"),
@@ -166,7 +255,11 @@ export default async function AdminPage({
     rejected: rows.filter((s: any) => s.status === "rejected"),
   };
 
-  const anyFilter = !!(q || onlyWeb || material || cert);
+  const anyFilter = !!(
+    q || onlyWeb || material || cert || siteCert || sustainabilityOnly || minRating || topOnly
+  );
+  // Filtre, ktoré zužujú výber na relevantných dodávateľov pre hromadný dopyt.
+  const resultFilter = !!(material || cert || siteCert || sustainabilityOnly || minRating || topOnly);
   const bulkDone = searchParams.bulk;
   const bulkLeft = searchParams.left;
 
@@ -191,6 +284,14 @@ export default async function AdminPage({
         </div>
       )}
 
+      {searchParams.signals !== undefined && (
+        <div className="rounded border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
+          Naskenovaných {searchParams.signals} dodávateľov (sustainability + certifikáty z webu).
+          Zostáva neskenovaných s webom: {searchParams.signalsLeft ?? "?"}.
+          {Number(searchParams.signalsLeft) > 0 && " Klikni tlačidlo znova a spracuj ďalšiu dávku."}
+        </div>
+      )}
+
       <form method="get" className="flex flex-wrap items-center gap-2 rounded border bg-white p-3">
         <input
           name="q"
@@ -208,11 +309,36 @@ export default async function AdminPage({
           <option value="polyester">Polyester</option>
         </select>
         <select name="cert" defaultValue={cert} className="rounded border px-3 py-2 text-sm">
-          <option value="">Certifikát: všetky</option>
+          <option value="">Certifikát (látka): všetky</option>
           <option value="OEKO-TEX">OEKO-TEX</option>
           <option value="GOTS">GOTS</option>
           <option value="GRS">GRS</option>
         </select>
+        <select name="siteCert" defaultValue={siteCert} className="rounded border px-3 py-2 text-sm">
+          <option value="">Certifikát (web): všetky</option>
+          <option value="OEKO-TEX">OEKO-TEX</option>
+          <option value="GOTS">GOTS</option>
+          <option value="GRS">GRS</option>
+          <option value="RWS">RWS</option>
+          <option value="BCI">BCI</option>
+          <option value="FSC">FSC</option>
+          <option value="Bluesign">Bluesign</option>
+        </select>
+        <select name="minRating" defaultValue={String(minRating || "")} className="rounded border px-3 py-2 text-sm">
+          <option value="">Google: všetky</option>
+          <option value="3">★ 3.0+</option>
+          <option value="3.5">★ 3.5+</option>
+          <option value="4">★ 4.0+</option>
+          <option value="4.5">★ 4.5+</option>
+        </select>
+        <label className="flex items-center gap-1 text-sm text-neutral-700">
+          <input type="checkbox" name="sustainability" value="1" defaultChecked={sustainabilityOnly} />
+          udržateľnosť
+        </label>
+        <label className="flex items-center gap-1 text-sm text-neutral-700">
+          <input type="checkbox" name="top" value="1" defaultChecked={topOnly} />
+          len TOP
+        </label>
         <label className="flex items-center gap-1 text-sm text-neutral-700">
           <input type="checkbox" name="onlyWeb" value="1" defaultChecked={onlyWeb} />
           len s webom
@@ -241,21 +367,27 @@ export default async function AdminPage({
             Dotiahnuť chýbajúce emaily (zadarmo, ~45 s)
           </button>
         </form>
+        <form action={backfillSignals}>
+          <button className="rounded bg-lime-600 px-3 py-1 text-xs text-white">
+            Naskenovať udržateľnosť + certifikáty (zadarmo, ~45 s)
+          </button>
+        </form>
       </div>
 
-      {(material || cert) && rows.length > 0 && (
+      {resultFilter && rows.length > 0 && (
         <OutreachPanel rows={rows} material={material} />
       )}
 
-      {(material || cert) && rows.length === 0 && (
+      {resultFilter && rows.length === 0 && (
         <p className="text-sm text-neutral-600">
-          Žiadny dodávateľ s dotiahnutými látkami nevyhovuje filtru. Najprv dotiahni látky (tlačidlo vyššie).
+          Žiadny dodávateľ nevyhovuje filtru. Ak filtruješ podľa látok/certifikátov, najprv dotiahni
+          dáta tlačidlami vyššie.
         </p>
       )}
 
-      <Section title={`Na schválenie (${groups.new.length})`} rows={groups.new} action={setStatus} />
-      <Section title={`Publikované (${groups.published.length})`} rows={groups.published} action={setStatus} />
-      <Section title={`Zamietnuté (${groups.rejected.length})`} rows={groups.rejected} action={setStatus} />
+      <Section title={`Na schválenie (${groups.new.length})`} rows={groups.new} action={setStatus} toggleTop={toggleTop} />
+      <Section title={`Publikované (${groups.published.length})`} rows={groups.published} action={setStatus} toggleTop={toggleTop} />
+      <Section title={`Zamietnuté (${groups.rejected.length})`} rows={groups.rejected} action={setStatus} toggleTop={toggleTop} />
     </div>
   );
 }
@@ -264,10 +396,12 @@ function Section({
   title,
   rows,
   action,
+  toggleTop,
 }: {
   title: string;
   rows: any[];
   action: (formData: FormData) => Promise<void>;
+  toggleTop: (formData: FormData) => Promise<void>;
 }) {
   if (rows.length === 0) return null;
   return (
@@ -280,15 +414,33 @@ function Section({
               <Link href={`/admin/supplier/${s.id}`} className="font-medium hover:underline">
                 {s.name}
               </Link>
+              {s.is_top && (
+                <span className="ml-2 inline-block rounded bg-amber-400 px-1.5 py-0.5 text-[10px] font-semibold text-amber-950">
+                  ★ TOP
+                </span>
+              )}
               {s.raw?.categoryName && (
                 <CategoryBadge category={s.raw.categoryName} />
               )}
               <div className="text-xs text-neutral-500">
                 {[s.city, s.country, s.website].filter(Boolean).join(" · ")} · zdroj: {s.source ?? "—"}
+                <RatingBadge raw={s.raw} />
               </div>
+              <SignalSummary sustainability={s.sustainability} certs={s.site_certifications} />
               <FabricSummary fabrics={s.fabrics} />
             </div>
             <div className="flex gap-2">
+              <form action={toggleTop}>
+                <input type="hidden" name="id" value={s.id} />
+                <input type="hidden" name="next" value={s.is_top ? "0" : "1"} />
+                <button
+                  className={`rounded px-3 py-1 text-xs ${
+                    s.is_top ? "bg-amber-400 text-amber-950" : "border hover:bg-neutral-50"
+                  }`}
+                >
+                  {s.is_top ? "★ TOP" : "Označiť TOP"}
+                </button>
+              </form>
               <Link
                 href={`/admin/supplier/${s.id}`}
                 className="rounded border px-3 py-1 text-xs hover:bg-neutral-50"
@@ -429,6 +581,39 @@ const MATERIAL_LABELS: Record<string, string> = {
   polyester: "polyester",
   elastane: "elastan",
 };
+
+// Google hodnotenie firmy (z Apify raw.totalScore / raw.reviewsCount).
+function RatingBadge({ raw }: { raw?: any }) {
+  const score = Number(raw?.totalScore);
+  if (!Number.isFinite(score) || score <= 0) return null;
+  const reviews = Number(raw?.reviewsCount);
+  return (
+    <span className="ml-2 rounded bg-yellow-100 px-1.5 py-0.5 text-[10px] text-yellow-800">
+      ★ {score.toFixed(1)}
+      {Number.isFinite(reviews) && reviews > 0 ? ` (${reviews})` : ""}
+    </span>
+  );
+}
+
+// Zhrnutie signálov z webu: udržateľnosť + certifikáty nájdené priamo na stránke.
+function SignalSummary({ sustainability, certs }: { sustainability?: boolean; certs?: string[] }) {
+  const list = Array.isArray(certs) ? certs : [];
+  if (!sustainability && list.length === 0) return null;
+  return (
+    <div className="mt-1 flex flex-wrap gap-1">
+      {sustainability && (
+        <span className="rounded bg-green-100 px-1.5 py-0.5 text-[10px] text-green-800">
+          ♻ udržateľnosť
+        </span>
+      )}
+      {list.map((c) => (
+        <span key={c} className="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] text-emerald-800">
+          {c} (web)
+        </span>
+      ))}
+    </div>
+  );
+}
 
 // Zhrnutie dotiahnutých látok: zoznam materiálov + certifikátov (pre rýchly shortlist).
 function FabricSummary({ fabrics }: { fabrics?: any[] }) {
