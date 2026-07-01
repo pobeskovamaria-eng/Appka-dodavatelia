@@ -32,7 +32,29 @@ export type ExtractedFabric = {
 export type ExtractResult = {
   fabrics: ExtractedFabric[];
   notes: string;
+  email: string | null;
 };
+
+// Nájde v texte webu pravdepodobný kontaktný email (uprednostní role adresy na doméne).
+function extractEmail(text: string, website: string): string | null {
+  const re = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g;
+  const raw = text.match(re) ?? [];
+  const found = [...new Set(raw.map((e) => e.toLowerCase()))].filter((e) => {
+    if (/\.(png|jpe?g|gif|webp|svg|css|js)$/i.test(e)) return false;
+    if (/(@2x|sentry|wixpress|example\.com|\.wix|godaddy|cloudflare)/i.test(e)) return false;
+    return true;
+  });
+  if (found.length === 0) return null;
+  const domain = website.replace(/^www\./, "");
+  const roles = ["info@", "contact@", "commerciale@", "vendite@", "sales@", "hello@", "office@"];
+  const sameDomain = found.filter((e) => e.endsWith("@" + domain) || e.includes(domain));
+  const pool = sameDomain.length ? sameDomain : found;
+  for (const r of roles) {
+    const m = pool.find((e) => e.startsWith(r));
+    if (m) return m;
+  }
+  return pool[0];
+}
 
 const SAVE_TOOL = {
   name: "save_fabrics",
@@ -215,8 +237,10 @@ export async function extractFabricsFromWebsite(
   console.log("[extract] fetched text length", siteText.length);
 
   if (!siteText) {
-    return { fabrics: [], notes: "Web sa nepodarilo stiahnuť (alebo je celý v JS/blokovaný)." };
+    return { fabrics: [], notes: "Web sa nepodarilo stiahnuť (alebo je celý v JS/blokovaný).", email: null };
   }
+
+  const email = extractEmail(siteText, opts.website);
 
   const client = new Anthropic();
   const params: any = {
@@ -243,10 +267,11 @@ export async function extractFabricsFromWebsite(
   );
   const input = block?.input ?? {};
   const fabrics = Array.isArray(input.fabrics) ? input.fabrics : [];
-  console.log("[extract] fabrics extracted", fabrics.length);
+  console.log("[extract] fabrics extracted", fabrics.length, "email", email ?? "-");
   return {
     fabrics,
     notes: typeof input.notes === "string" ? input.notes : "",
+    email,
   };
 }
 
@@ -277,7 +302,7 @@ export async function autoExtractFabrics(
   const admin = createSupabaseAdminClient();
   const { data: supplier } = await admin
     .from("suppliers")
-    .select("id, name, website, fabrics_fetched_at")
+    .select("id, name, website, email, fabrics_fetched_at")
     .eq("id", supplierId)
     .maybeSingle();
 
@@ -296,7 +321,7 @@ export async function autoExtractFabrics(
   }
 
   try {
-    const { fabrics } = await extractFabricsFromWebsite(
+    const { fabrics, email } = await extractFabricsFromWebsite(
       {
         name: supplier.name,
         website: supplier.website,
@@ -306,6 +331,10 @@ export async function autoExtractFabrics(
     const rows = mapFabricsToRows(supplierId, fabrics);
     if (rows.length > 0) {
       await admin.from("fabrics").insert(rows);
+    }
+    // Doplň kontaktný email z webu, ak dodávateľ ešte žiadny nemá.
+    if (email && !supplier.email) {
+      await admin.from("suppliers").update({ email }).eq("id", supplierId);
     }
   } catch (e: any) {
     console.error("autoExtractFabrics failed", supplierId, e?.message ?? e);

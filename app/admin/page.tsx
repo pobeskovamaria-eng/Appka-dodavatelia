@@ -91,7 +91,7 @@ export default async function AdminPage({
   let query = admin
     .from("suppliers")
     .select(
-      "id, name, website, country, city, source, source_url, status, created_at, raw, fabrics(material_type, certifications)"
+      "id, name, website, email, phone, country, city, source, source_url, status, created_at, raw, fabrics(material_type, certifications)"
     )
     .order("created_at", { ascending: false })
     .limit(300);
@@ -185,6 +185,10 @@ export default async function AdminPage({
         </form>
       </div>
 
+      {(material || cert) && rows.length > 0 && (
+        <OutreachPanel rows={rows} material={material} />
+      )}
+
       {(material || cert) && rows.length === 0 && (
         <p className="text-sm text-neutral-600">
           Žiadny dodávateľ s dotiahnutými látkami nevyhovuje filtru. Najprv dotiahni látky (tlačidlo vyššie).
@@ -261,6 +265,99 @@ function Section({
           </li>
         ))}
       </ul>
+    </section>
+  );
+}
+
+// Hromadný dopyt: adresy na BCC + hotový email + CSV pre vyfiltrovaných dodávateľov.
+function OutreachPanel({ rows, material }: { rows: any[]; material: string }) {
+  const withEmail = rows.filter(
+    (s: any) => typeof s.email === "string" && s.email.includes("@")
+  );
+  const emails = [...new Set(withEmail.map((s: any) => (s.email as string).toLowerCase()))];
+  const label = MATERIAL_LABELS[material] || "látky";
+  const labelEn =
+    ({ silk: "silk", cotton: "cotton", linen: "linen", wool: "wool", viscose: "viscose", polyester: "polyester" } as Record<string, string>)[
+      material
+    ] || "fabric";
+
+  const subject = `Fabric sourcing inquiry - ${labelEn}`;
+  const body = `Dear Sir or Madam,
+
+We are a fashion brand sourcing ${labelEn} fabrics and would like to request information and a quotation.
+
+Our requirements:
+- Material: ${labelEn}
+- Weight: (e.g. silk 19 momme)
+- Finish: PFD (prepared for dyeing) or available in plain colours
+- Certification: OEKO-TEX Standard 100
+- Approx. quantity / MOQ: ...
+
+Could you please share:
+1) Available qualities matching the above (composition and weight),
+2) Whether the fabric is dyeable / available in plain colours,
+3) OEKO-TEX (or other) certification,
+4) MOQ, price per metre and lead time,
+5) Sample availability.
+
+Thank you, we look forward to your reply.
+
+Best regards,
+[Your name]
+[Company]`;
+
+  const csvHeader = "email,name,website,city";
+  const csvLines = withEmail.map((s: any) =>
+    [s.email, s.name, s.website, s.city]
+      .map((v) => `"${String(v ?? "").replace(/"/g, '""')}"`)
+      .join(",")
+  );
+  const csv = [csvHeader, ...csvLines].join("\n");
+  const csvHref = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
+
+  return (
+    <section className="space-y-3 rounded border border-amber-200 bg-amber-50 p-4">
+      <h2 className="font-medium">
+        Hromadný dopyt – {label} ({emails.length} adries z {rows.length} dodávateľov)
+      </h2>
+      {emails.length === 0 ? (
+        <p className="text-sm text-neutral-700">
+          Žiadny z vyfiltrovaných dodávateľov nemá email. Dotiahni viac dávok (email sa ťahá z webu pri
+          extrakcii) alebo doplň email ručne v detaile dodávateľa.
+        </p>
+      ) : (
+        <>
+          <div>
+            <label className="text-xs text-neutral-600">Adresy — skopíruj a vlož do poľa BCC v Gmaile:</label>
+            <textarea
+              readOnly
+              rows={3}
+              className="w-full rounded border p-2 text-xs"
+              value={emails.join(", ")}
+            />
+          </div>
+          <div>
+            <label className="text-xs text-neutral-600">Predmet:</label>
+            <textarea readOnly rows={1} className="w-full rounded border p-2 text-xs" value={subject} />
+          </div>
+          <div>
+            <label className="text-xs text-neutral-600">Text emailu (uprav [Your name], váhu, MOQ…):</label>
+            <textarea readOnly rows={18} className="w-full rounded border p-2 text-xs" value={body} />
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <a
+              href={csvHref}
+              download="dodavatelia.csv"
+              className="inline-block rounded bg-neutral-900 px-3 py-1 text-xs text-white"
+            >
+              Stiahnuť CSV (email, názov, web)
+            </a>
+            <span className="text-xs text-neutral-500">
+              Postup: skopíruj adresy → Gmail → Nový email → do BCC vlož adresy → predmet a text z polí vyššie → uprav a odošli.
+            </span>
+          </div>
+        </>
+      )}
     </section>
   );
 }
