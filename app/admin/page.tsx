@@ -126,7 +126,7 @@ export default async function AdminPage({
       {bulkDone !== undefined && (
         <div className="rounded border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
           Dotiahnuté látky pre {bulkDone} dodávateľov. Zostáva nespracovaných s webom: {bulkLeft ?? "?"}.
-          {Number(bulkLeft) > 0 && " Klikni „Dotiahnuť ďalšiu dávku" znova."}
+          {Number(bulkLeft) > 0 && " Klikni tlačidlo znova a spracuj ďalšiu dávku."}
         </div>
       )}
 
